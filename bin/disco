@@ -1,0 +1,29 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+
+$: << File.expand_path('../../lib', __FILE__)
+
+require 'aws'
+require 'disco'
+
+
+abort('Please specify seeds') unless ARGV.first
+
+instance_cache_path = File.expand_path('../../.instances.json', __FILE__)
+connection_cache_path = File.expand_path('../../.connections.json', __FILE__)
+
+ec2 = File.exists?(instance_cache_path) ? nil : AWS::EC2.new(ec2_endpoint: 'ec2.eu-west-1.amazonaws.com')
+instance_cache = Disco::InstanceCache.new(ec2, instance_cache_path)
+services = Disco::ServicePortMapper.new(custom: {'apani1' => 9160}, significant: [1..10_000, 27017, 55672])
+instance_filter = Disco::ProcFilter.new { |instance| instance.environment == 'staging' }
+# instance_filter = Disco::NullFilter.new
+connection_explorer = Disco::ConnectionExplorer.new(instance_cache, Disco::ParserFactory.new(services), username: 'burt', sampling_duration: 10.0)
+topology_explorer = Disco::TopologyExplorer.new(connection_explorer, instance_cache, instance_filter)
+
+instance_cache.cache!
+
+connections = topology_explorer.discover_topology(ARGV)
+
+flattened_connections = connections.map { |c| [c.upstream.name, c.downstream.name, c.port] }
+
+puts(flattened_connections.to_json)

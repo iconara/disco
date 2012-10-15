@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+
+$: << File.expand_path('../../lib', __FILE__)
+
+require 'json'
+require 'disco'
+
+
+abort('Please specify connections file') unless ARGV.first
+
+instance_cache_path = File.expand_path('../../.instances.json', __FILE__)
+
+instance_cache = Disco::InstanceCache.new(nil, instance_cache_path)
+services = Disco::ServicePortMapper.new(custom: {'apani1' => 9160}, significant: [1..10_000, 27017, 55672])
+renderer = Disco::DotRenderer.new(services)
+
+instance_cache.cache!
+
+connections = JSON.parse(File.read(ARGV.first)).map do |upstream, downstream, port|
+  Disco::Connection.new(instance_cache[upstream], instance_cache[downstream], port )
+end
+
+renderer.render(connections)
+
