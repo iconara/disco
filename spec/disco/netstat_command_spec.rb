@@ -2,14 +2,16 @@ require_relative '../spec_helper'
 
 
 module Disco
-  describe NetstatParser do
+  describe NetstatCommand do
+    stubs :session
+
     let :port_mapper do
       pm = stub(:port_mapper)
       pm.stub(:numeric_port) { |s| s.to_i }
       pm
     end
 
-    let :parser do
+    let :command do
       described_class.new(port_mapper)
     end
 
@@ -17,9 +19,10 @@ module Disco
       File.readlines(__FILE__).drop_while { |line| !line.start_with?('__END') }.drop(1).join("\n")
     end
 
-    describe '#extract_connections' do
+    describe '#connections' do
       let :connections do
-        parser.extract_connections(data)
+        session.stub(:exec!).with('netstat --tcp --numeric').and_return(data)
+        command.connections(session)
       end
 
       it 'returns all downstream IP/port pairs' do

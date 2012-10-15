@@ -16,5 +16,9 @@ module Disco
     def hash
       @hash ||= (((upstream.hash * 31) ^ (downstream.hash)) * 31) ^ port
     end
+
+    def to_s
+      @s ||= "Connection(#{upstream}, #{downstream}, #{port})"
+    end
   end
 end

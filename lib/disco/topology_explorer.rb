@@ -18,6 +18,7 @@ module Disco
         next if visited_instances.include?(instance)
         connections = @connection_explorer.discover_connections(instance)
         connections.each do |connection|
+          $stderr.puts("Discovered #{connection}")
           exploration_queue << connection.downstream if @filter.include?(connection.downstream)
           topology << connection
         end

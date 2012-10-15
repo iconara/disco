@@ -5,10 +5,9 @@ require 'net/ssh'
 
 module Disco
   class ConnectionExplorer
-    def initialize(instance_cache, parser_factory, options={})
+    def initialize(commands, instance_cache, options={})
       @instance_cache = instance_cache
-      @lsof_parser = parser_factory.lsof
-      @netstat_parser = parser_factory.netstat
+      @commands = commands
       @username = options[:username]
       @ssh_factory = options[:ssh_factory] || Net::SSH
       @sampling_duration = options[:sampling_duration] || 0.0
@@ -19,10 +18,12 @@ module Disco
       @ssh_factory.start(instance.name, @username) do |session|
         stop_at = Time.now + @sampling_duration
         begin
-          if output = session.exec!(LSOF_COMMAND)
-            connections.concat(@lsof_parser.extract_connections(output))
-          elsif output = session.exec!(NETSTAT_COMMAND)
-            connections.concat(@netstat_parser.extract_connections(output))
+          @commands.each do |command|
+            c = command.connections(session)
+            if c.any?
+              connections.concat(c)
+              break
+            end
           end
         end while Time.now < stop_at
       end
@@ -34,10 +35,5 @@ module Disco
         end
       end.compact
     end
-
-    private
-
-    LSOF_COMMAND = '/usr/sbin/lsof -i'.freeze
-    NETSTAT_COMMAND = 'netstat --tcp --numeric'.freeze
   end
 end

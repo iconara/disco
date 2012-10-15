@@ -1,12 +1,17 @@
 # encoding: utf-8
 
 module Disco
-  class ConnectionParser
+  class ConnectionCommand
     def initialize(port_mapper)
       @port_mapper = port_mapper
     end
 
+    def connections(ssh_session)
+      extract_connections(ssh_session.exec!(command))
+    end
+
     def extract_connections(str)
+      return [] unless str
       connections = str.split("\n").flat_map do |line|
         extract_from_line(line)
       end
@@ -21,40 +26,36 @@ module Disco
 
     protected
 
+    def command
+      raise 'Override #command in a subclass!'
+    end
+
     def extract_from_line(line)
       raise 'Override #extract_from_line in a subclass!'
     end
   end
 
-  class NetstatParser < ConnectionParser
-    def initialize(port_mapper)
-      @port_mapper = port_mapper
-    end
-
+  class NetstatCommand < ConnectionCommand
     protected
+
+    def command
+      'netstat --tcp --numeric'
+    end
 
     def extract_from_line(line)
       line.scan(/(\S+:\d+)\s+\w+\s*$/).first
     end
   end
 
-  class LsofParser < ConnectionParser
+  class LsofCommand < ConnectionCommand
+    protected
+    
+    def command
+      '/usr/sbin/lsof -i'
+    end
+
     def extract_from_line(line)
       line.scan(/->(.+?\.compute\.internal:\S+)/).first
-    end
-  end
-
-  class ParserFactory
-    def initialize(port_mapper)
-      @port_mapper = port_mapper
-    end
-
-    def lsof
-      @lsof ||= LsofParser.new(@port_mapper)
-    end
-
-    def netstat
-      @netstat ||= NetstatParser.new(@port_mapper)
     end
   end
 end

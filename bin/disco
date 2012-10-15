@@ -17,7 +17,8 @@ instance_cache = Disco::InstanceCache.new(ec2, instance_cache_path)
 services = Disco::ServicePortMapper.new(custom: {'apani1' => 9160}, significant: [1..10_000, 27017, 55672])
 instance_filter = Disco::ProcFilter.new { |instance| instance.environment == 'staging' }
 # instance_filter = Disco::NullFilter.new
-connection_explorer = Disco::ConnectionExplorer.new(instance_cache, Disco::ParserFactory.new(services), username: 'burt', sampling_duration: 10.0)
+discovery_commands = [Disco::LsofCommand.new(services), Disco::NetstatCommand.new(services)]
+connection_explorer = Disco::ConnectionExplorer.new(discovery_commands, instance_cache, username: 'burt', sampling_duration: 10.0)
 topology_explorer = Disco::TopologyExplorer.new(connection_explorer, instance_cache, instance_filter)
 
 instance_cache.cache!
