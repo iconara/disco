@@ -8,7 +8,9 @@ require 'ipaddr'
 module Disco
   class InstanceCache
     def initialize(*args)
-      @ec2, @cache_path = args
+      @ec2, @cache_path, @instance_filter = args
+      @instance_filter ||= NullFilter.new
+      @mappings = {}
     end
 
     def cache!
@@ -35,6 +37,7 @@ module Disco
     def read_cache
       if File.exists?(@cache_path)
         @instances = JSON.parse(File.read(@cache_path)).map { |data| Instance.new(data) }
+        @instances = @instances.select { |instance| @instance_filter.include?(instance) }
         make_mappings
       end
     end

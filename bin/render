@@ -18,7 +18,7 @@ renderer = Disco::DotRenderer.new(services)
 instance_cache.cache!
 
 connections = JSON.parse(File.read(ARGV.first)).map do |upstream, downstream, port|
-  Disco::Connection.new(instance_cache[upstream], instance_cache[downstream], port )
+  Disco::Connection.new(instance_cache[upstream], instance_cache[downstream], port)
 end
 
 renderer.render(connections)

@@ -6,8 +6,7 @@ require 'set'
 module Disco
   class TopologyExplorer
     def initialize(*args)
-      @connection_explorer, @instance_cache, @filter = args
-      @filter ||= NullFilter.new
+      @connection_explorer, @instance_cache = args
     end
 
     def discover_topology(seed_nodes)
@@ -19,7 +18,7 @@ module Disco
         connections = @connection_explorer.discover_connections(instance)
         connections.each do |connection|
           $stderr.puts("Discovered #{connection}")
-          exploration_queue << connection.downstream if @filter.include?(connection.downstream)
+          exploration_queue << connection.downstream
           topology << connection
         end
         visited_instances << instance

@@ -3,9 +3,7 @@ require_relative '../spec_helper'
 
 module Disco
   describe InstanceCache do
-    let :ec2 do
-      stub(:ec2)
-    end
+    stubs :ec2
 
     let :base_dir do
       Dir.mktmpdir('disco')
@@ -15,8 +13,12 @@ module Disco
       File.join(base_dir, 'instances.json')
     end
 
+    let :instance_filter do
+      stub(:instance_filter, :include? => true)
+    end
+
     let :instance_cache do
-      described_class.new(ec2, cache_path)
+      described_class.new(ec2, cache_path, instance_filter)
     end
 
     let :ec2_instances do
@@ -89,6 +91,14 @@ module Disco
           write_cache
           instance_cache.cache!
           instance_cache.resolve_name('10.51.34.249').should_not be_nil
+        end
+
+        it 'filters instances through the specified filter' do
+          write_cache
+          instance_filter.stub(:include?) { |instance| instance.role == 'parser' }
+          instance_cache.cache!
+          instance_cache.get('stagingassembler110.byburt.com').should be_nil
+          instance_cache.get('stagingparser102.byburt.com').should_not be_nil
         end
       end
 

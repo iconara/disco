@@ -11,12 +11,8 @@ module Disco
       ic
     end
 
-    let :filter do
-      stub(:filter, :include? => true)
-    end
-
     let :explorer do
-      described_class.new(connection_explorer, instance_cache, filter)
+      described_class.new(connection_explorer, instance_cache)
     end
 
     describe '#discover_topology' do
@@ -44,14 +40,6 @@ module Disco
         connection_explorer.stub(:discover_connections).with(instance2).and_return([Disco::Connection.new(instance2, instance3, 2), Disco::Connection.new(instance2, instance3, 3), Disco::Connection.new(instance2, instance3, 4)])
         topology = explorer.discover_topology(%w[host1])
       end
-
-      it 'does not follow nodes that are not included by the specified filter' do
-        filter.stub(:include?).with(instance2).and_return(false)
-        topology = explorer.discover_topology(%w[host1])
-        topology.should_not include(Disco::Connection.new(instance2, instance3, 2))
-      end
-
-      # TODO: filters
     end
   end
 end
