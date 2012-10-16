@@ -2,8 +2,8 @@
 
 module Disco
   class ConnectionCommand
-    def initialize(port_mapper)
-      @port_mapper = port_mapper
+    def initialize(port_mapper=nil)
+      @port_mapper = port_mapper || SimplePortMapper.new
     end
 
     def connections(ssh_session)

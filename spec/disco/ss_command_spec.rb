@@ -5,14 +5,8 @@ module Disco
   describe SsCommand do
     stubs :session
 
-    let :port_mapper do
-      pm = stub(:port_mapper)
-      pm.stub(:numeric_port) { |s| s.to_i }
-      pm
-    end
-
     let :command do
-      described_class.new(port_mapper)
+      described_class.new
     end
 
     let :data do

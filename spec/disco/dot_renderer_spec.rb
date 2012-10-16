@@ -13,12 +13,12 @@ module Disco
       ]
     end
 
-    let :service_mappings do
-      stub(:service_mappings)
+    let :filter do
+      stub(:filter, :include? => true)
     end
 
     let :renderer do
-      described_class.new(service_mappings)
+      described_class.new(filter)
     end
 
     describe '#render' do
@@ -26,11 +26,6 @@ module Disco
         io = StringIO.new
         renderer.render(connections, io)
         io.string
-      end
-
-      before do
-        service_mappings.stub(:service?).with(anything).and_return(true)
-        service_mappings.stub(:service?).with(13412).and_return(false)
       end
 
       it 'prints a digraph onto the specified IO' do
@@ -48,9 +43,10 @@ module Disco
         connections.should include(['layer202', 'layer302', '3412'])
       end
 
-      it 'prints, but hides, connections with insignificant ports' do
-        connections = output.scan(/^#\s+(\S+) -> (\S+) \[label=(.+?)\]/)
-        connections.should include(['layer202', 'layer302', '13412'])
+      it 'does not include connections rejected by the filter' do
+        filter.stub(:include?).with(connections.last).and_return(false)
+        connections = output.scan(/^\s+(\S+) -> (\S+) \[label=(.+?)\]/)
+        connections.should_not include(['layer202', 'layer302', '13412'])
       end
     end
   end

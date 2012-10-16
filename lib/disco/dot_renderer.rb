@@ -2,8 +2,8 @@
 
 module Disco
   class DotRenderer
-    def initialize(service_mappings)
-      @service_mappings = service_mappings
+    def initialize(filter)
+      @filter = filter
     end
 
     def render(connections, io=$stdout)
@@ -11,8 +11,9 @@ module Disco
       io.puts("\tgraph [overlap=false];")
       io.puts("\tnode [shape=rect];")
       connections.each do |c|
-        prefix = @service_mappings.service?(c.port) ? '' : '#'
-        io.puts(sprintf("%s\t%s -> %s [label=%d];", prefix, c.upstream.short_name, c.downstream.short_name, c.port))
+        if @filter.include?(c)
+          io.puts(sprintf("\t%s -> %s [label=%d];", c.upstream.short_name, c.downstream.short_name, c.port))
+        end
       end
       io.puts('}')
     end

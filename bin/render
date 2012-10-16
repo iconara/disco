@@ -12,8 +12,8 @@ abort('Please specify connections file') unless ARGV.first
 instance_cache_path = File.expand_path('../../.instances.json', __FILE__)
 
 instance_cache = Disco::InstanceCache.new(nil, instance_cache_path)
-services = Disco::ServicePortMapper.new(custom: {'apani1' => 9160}, significant: [1..10_000, 27017, 55672])
-renderer = Disco::DotRenderer.new(services)
+connection_filter = Disco::PortFilter.new(1..10_000, 27017, 55672)
+renderer = Disco::DotRenderer.new(connection_filter)
 
 instance_cache.cache!
 

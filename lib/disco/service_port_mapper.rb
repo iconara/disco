@@ -1,21 +1,24 @@
 # encoding: utf-8
 
 module Disco
-  class ServicePortMapper
+  class SimplePortMapper
+    def numeric_port(str)
+      return nil unless str =~ /^\d+$/
+      str.to_i
+    end
+  end
+
+  class ServicePortMapper < SimplePortMapper
     def initialize(options={})
       @path = options[:path] || '/etc/services'
       @custom_mappings = options[:custom] || {}
-      @significant_ports = options[:significant] || []
     end
 
     def numeric_port(str)
-      return str.to_i if str =~ /^\d+$/
-      cache_mappings unless defined? @mappings
-      @mappings[str]
-    end
-
-    def service?(port)
-      @significant_ports.any? { |rng| rng === port }
+      super or begin
+        cache_mappings unless defined? @mappings
+        @mappings[str]
+      end
     end
 
     private

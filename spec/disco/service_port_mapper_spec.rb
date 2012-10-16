@@ -31,18 +31,6 @@ module Disco
         mapper.numeric_port('apa').should be_nil
       end
     end
-
-    describe '#service?' do
-      it 'returns true for specified ports' do
-        mapper.service?(1234).should be_true
-        mapper.service?(1337).should be_true
-        mapper.service?(27017).should be_true
-      end
-
-      it 'returns false for all other ports' do
-        mapper.service?(55871).should be_false
-      end
-    end
   end
 end
 

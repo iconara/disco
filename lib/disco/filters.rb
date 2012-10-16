@@ -16,4 +16,14 @@ module Disco
       @filter.call(name)
     end
   end
+
+  class PortFilter
+    def initialize(*ranges)
+      @ranges = ranges
+    end
+
+    def include?(connection)
+      @ranges.any? { |rng| rng === connection.port }
+    end
+  end
 end
