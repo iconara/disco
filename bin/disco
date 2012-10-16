@@ -20,8 +20,6 @@ discovery_commands = [Disco::SsCommand.new(services)]
 connection_explorer = Disco::ConnectionExplorer.new(discovery_commands, instance_cache, username: 'burt', sampling_duration: 2.0)
 topology_explorer = Disco::TopologyExplorer.new(connection_explorer, instance_cache)
 
-instance_cache.cache!
-
 topology_explorer.on :visit_instance do |event|
   $stderr.puts("Visiting #{event[:instance].name}")
 end

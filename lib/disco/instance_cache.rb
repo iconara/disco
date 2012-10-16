@@ -10,16 +10,6 @@ module Disco
     def initialize(*args)
       @ec2, @cache_path, @instance_filter = args
       @instance_filter ||= NullFilter.new
-      @mappings = {}
-    end
-
-    def cache!
-      read_cache
-      unless defined? @instances
-        find_instances
-        write_cache
-        read_cache
-      end
     end
 
     def resolve_name(name)
@@ -28,11 +18,23 @@ module Disco
     end
 
     def get(name)
+      cache!
       @mappings[name]
     end
     alias_method :[], :get
 
     private
+
+    def cache!
+      unless @mappings
+        read_cache
+        unless @instances
+          find_instances
+          write_cache
+          read_cache
+        end
+      end
+    end
 
     def read_cache
       if File.exists?(@cache_path)

@@ -85,18 +85,21 @@ module Disco
       end
     end
 
-    describe '#cache!' do
+    context 'caching' do
       context 'when a cache exists' do
-        it 'reads the cache' do
+        it 'reads the cache when #resolve_name is called' do
           write_cache
-          instance_cache.cache!
           instance_cache.resolve_name('10.51.34.249').should_not be_nil
+        end
+
+        it 'reads the cache when #get is called' do
+          write_cache
+          instance_cache.get('10.51.34.249').should_not be_nil
         end
 
         it 'filters instances through the specified filter' do
           write_cache
           instance_filter.stub(:include?) { |instance| instance.role == 'parser' }
-          instance_cache.cache!
           instance_cache.get('stagingassembler110.byburt.com').should be_nil
           instance_cache.get('stagingparser102.byburt.com').should_not be_nil
         end
@@ -105,7 +108,7 @@ module Disco
       context 'when no cache exists' do
         it 'asks the EC2 service for all instances' do
           ec2.stub(:instances).and_return(ec2_instances)
-          instance_cache.cache!
+          instance_cache.get('stagingassembler110.byburt.com')
           JSON.parse(File.read(cache_path)).should == JSON.parse(cached_instances.to_json)
         end
       end
@@ -114,7 +117,6 @@ module Disco
     describe '#get' do
       before do
         write_cache
-        instance_cache.cache!
       end
 
       it 'returns info about an instance' do
@@ -126,7 +128,6 @@ module Disco
     describe '#resolve_name' do
       before do
         write_cache
-        instance_cache.cache!
       end
 
       it 'resolves a private DNS name to a name' do
