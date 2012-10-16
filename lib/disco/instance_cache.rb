@@ -78,7 +78,7 @@ module Disco
     end
 
     def write_cache
-      File.open(@cache_path, 'w') { |io| io.write(@instances.map(&:to_h).to_json) }
+      File.open(@cache_path, 'w') { |io| io.write(JSON.pretty_generate(@instances.map(&:to_h))) }
     end
 
     def find_instances
