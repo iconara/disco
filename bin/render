@@ -14,7 +14,8 @@ abort('Please re-run disco to recreate the instance cache') unless File.exists?(
 
 instances = Disco::InstanceCache.new(instance_cache_path).instances
 connection_filter = Disco::PortFilter.new(1..10_000, 27017, 55672)
-renderer = Disco::DotRenderer.new(connection_filter)
+colorizer = Disco::TagColorizer.new('Role')
+renderer = Disco::DotRenderer.new(connection_filter, colorizer)
 
 connections = JSON.parse(File.read(ARGV.first)).map do |connection|
   Disco::Connection.from_h(connection, instances)

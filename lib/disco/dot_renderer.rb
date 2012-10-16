@@ -5,14 +5,16 @@ require 'set'
 
 module Disco
   class DotRenderer
-    def initialize(filter)
-      @filter = filter
+    def initialize(*args)
+      @filter, @colorizer = args
+      @colorizer ||= NullColorizer.new
     end
 
     def render(connections, io=$stdout)
-      io.puts("digraph topology {")
-      io.puts("\tgraph [overlap=false];")
-      io.puts("\tnode [shape=rect];")
+      io.puts(%|digraph "Topology" {|)
+      io.puts(%|\tgraph [overlap=false];|)
+      io.puts(%|\tnode [shape="rect", fontname="Helvetica", style="filled"];|)
+      io.puts(%|\tedge [fontname="Helvetica"];|)
       io.puts
       print_nodes(uniq_instances(connections), io)
       print_edges(connections, io)
@@ -32,7 +34,7 @@ module Disco
 
     def print_nodes(instances, io)
       instances.each do |instance|
-        io.puts(sprintf(%|\t%s [label="%s"];|, node_id(instance), instance.name))
+        io.puts(sprintf(%|\t%s [label="%s", fillcolor="%s"];|, node_id(instance), instance.name, @colorizer.color(instance)))
       end
       io.puts
     end
@@ -72,6 +74,31 @@ module Disco
       when 'K' then speed * 1024
       else speed
       end
+    end
+  end
+
+  class NullColorizer
+    def color(instance)
+      'transparent'
+    end
+  end
+
+  class TagColorizer
+    def initialize(tag)
+      @tag = tag
+      @colors = Hash.new do |h, k|
+        h[k] = next_color
+      end
+    end
+
+    def color(instance)
+      @colors[instance.tags[@tag]]
+    end
+
+    private
+
+    def next_color
+      '#%2x%2x%2x' % [rand(255), rand(255), rand(255)]
     end
   end
 end
