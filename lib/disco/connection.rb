@@ -2,10 +2,11 @@
 
 module Disco
   class Connection
-    attr_reader :upstream_instance, :downstream_instance, :upstream_port, :downstream_port
+    attr_reader :upstream_instance, :downstream_instance, :upstream_port, :downstream_port, :properties
 
     def initialize(*args)
       @upstream_instance, @downstream_instance, @upstream_port, @downstream_port, @properties = args
+      @properties ||= {}
     end
 
     def eql?(other)
@@ -32,7 +33,8 @@ module Disco
         :upstream_host => upstream_instance.name || upstream_instance.private_ip_address,
         :downstream_host => downstream_instance.name || downstream_instance.private_ip_address,
         :upstream_port => upstream_port,
-        :downstream_port => downstream_port
+        :downstream_port => downstream_port,
+        :properties => @properties
       }
     end
 
@@ -47,7 +49,8 @@ module Disco
         upstream_instance,
         downstream_instance,
         h[:upstream_port] || h['upstream_port'],
-        h[:downstream_port] || h['downstream_port']
+        h[:downstream_port] || h['downstream_port'],
+        h[:properties] || h['properties']
       )
     end
   end

@@ -10,7 +10,7 @@ module Disco
     end
 
     let :data do
-      File.readlines(__FILE__).drop_while { |line| !line.start_with?('__END') }.drop(1).join("\n")
+      File.readlines(__FILE__).drop_while { |line| !line.start_with?('__END') }.drop(1).join('')
     end
 
     describe '#connections' do
@@ -20,13 +20,13 @@ module Disco
       end
 
       it 'returns all downstream IP/port pairs' do
-        connections.should include([57831, '::ffff:10.53.142.128', 5672])
-        connections.should include([52785, '::ffff:10.48.178.144', 5672])
-        connections.should include([22, '37.123.148.251', 44379])
+        connections.should include([57831, '::ffff:10.53.142.128', 5672, {'send' => '7.9Mbps'}])
+        connections.should include([52785, '::ffff:10.48.178.144', 5672, {'send' => '247.1Mbps'}])
+        connections.should include([22, '37.123.148.251', 44379, {'send' => '1.0Mbps'}])
       end
 
       it 'does not return connections to localhost' do
-        connections.should_not include([4369, '127.0.0.1', 45503])
+        connections.find { |_, host, _, _| host == '127.0.0.1' }.should be_nil
       end
     end
   end

@@ -21,7 +21,8 @@ module Disco
           :upstream_host => 'host0',
           :downstream_host => 'host1',
           :upstream_port => 1,
-          :downstream_port => 2
+          :downstream_port => 2,
+          :properties => {}
         }
       end
 
@@ -31,7 +32,8 @@ module Disco
           :upstream_host => 'host0',
           :downstream_host => '1.1.1.1',
           :upstream_port => 1,
-          :downstream_port => 2
+          :downstream_port => 2,
+          :properties => {}
         }
       end
     end
@@ -49,7 +51,8 @@ module Disco
           'upstream_host' => 'host0',
           'downstream_host' => 'host1',
           'upstream_port' => 1,
-          'downstream_port' => 2
+          'downstream_port' => 2,
+          'properties' => {'test' => 123}
         }
       end
 
@@ -58,7 +61,8 @@ module Disco
           :upstream_host => 'host0',
           :downstream_host => 'host1',
           :upstream_port => 1,
-          :downstream_port => 2
+          :downstream_port => 2,
+          :properties => {'test' => 123}
         }
       end
 
@@ -68,6 +72,7 @@ module Disco
         connection.downstream_instance.should == instance1
         connection.upstream_port.should == 1
         connection.downstream_port.should == 2
+        connection.properties.should == {'test' => 123}
       end
 
       it 'creates an instance from the given properties (with string keys), resolving instances with the instance registry' do
@@ -76,6 +81,7 @@ module Disco
         connection.downstream_instance.should == instance1
         connection.upstream_port.should == 1
         connection.downstream_port.should == 2
+        connection.properties.should == {'test' => 123}
       end
 
       it 'raises an error if an instance could not be resolved' do
@@ -100,10 +106,28 @@ module Disco
       it 'is not equal if the instances are reversed' do
         connection.eql?(described_class.new(instance1, instance0, 1, 2)).should be_false
       end
+
+      it 'is equal even if the properties differ' do
+        connection.eql?(described_class.new(instance0, instance1, 1, 2, {'test' => 999})).should be_true
+      end
     end
 
     describe '#hash' do
+      it 'is the same for the same the same upstream and downstream instances and ports' do
+        connection.hash.should == described_class.new(instance0, instance1, 1, 2).hash
+      end
 
+      it 'is different if the ports differ' do
+        connection.hash.should_not == described_class.new(instance0, instance1, 99, 2).hash
+      end
+
+      it 'is different if the instances are reversed' do
+        connection.hash.should_not == described_class.new(instance1, instance0, 1, 2).hash
+      end
+
+      it 'is the same even if the properties differ' do
+        connection.hash.should == described_class.new(instance0, instance1, 1, 2, {'test' => 'hello'}).hash
+      end
     end
   end
 end

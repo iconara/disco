@@ -28,10 +28,10 @@ module Disco
         end while Time.now < stop_at
       end
       connections.uniq!
-      connections.map do |upstream_port, downstream_host, downstream_port|
+      connections.map do |upstream_port, downstream_host, downstream_port, properties|
         downstream_instance = @instance_cache[downstream_host]
         if downstream_instance && instance && downstream_instance != instance
-          Connection.new(instance, downstream_instance, upstream_port, downstream_port)
+          Connection.new(instance, downstream_instance, upstream_port, downstream_port, properties)
         end
       end.compact
     end
