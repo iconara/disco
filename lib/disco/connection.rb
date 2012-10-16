@@ -25,7 +25,7 @@ module Disco
     end
 
     def to_s
-      @s ||= "Connection(#{upstream_instance}, #{downstream_instance}, #{upstream_port}, #{downstream_port})"
+      @s ||= "Connection(#{upstream_instance}, #{downstream_instance}, #{upstream_port}, #{downstream_port}, #{properties.inspect})"
     end
 
     def to_h
