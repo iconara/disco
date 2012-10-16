@@ -41,18 +41,6 @@ module Disco
         topology = explorer.discover_topology(%w[host1])
       end
 
-      it 'removes duplicate connections to the same downstream port' do
-        connection_explorer.stub(:discover_connections).with(instance1).and_return([
-          Disco::Connection.new(instance1, instance2, 99, 1),
-          Disco::Connection.new(instance1, instance2, 999, 1),
-          Disco::Connection.new(instance1, instance2, 9999, 1),
-          Disco::Connection.new(instance1, instance3, 99, 1)
-        ])
-        topology = explorer.discover_topology(%w[host1])
-        topology.should_not include(Disco::Connection.new(instance1, instance2, 999, 1))
-        topology.should_not include(Disco::Connection.new(instance1, instance2, 9999, 1))
-      end
-
       context 'events' do
         it 'triggers an event before visiting an instance' do
           triggered = false

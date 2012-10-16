@@ -13,6 +13,7 @@ module Disco
     let :connections do
       [
         Connection.new(instance101, instance201, 62312, 1234),
+        Connection.new(instance101, instance201, 63457, 1234),
         Connection.new(instance102, instance201, 62312, 1234),
         Connection.new(instance201, instance301, 62312, 3412),
         Connection.new(instance202, instance302, 62312, 3412),
@@ -57,8 +58,14 @@ module Disco
 
       it 'does not include connections rejected by the filter' do
         filter.stub(:include?).with(connections.last).and_return(false)
-        connections = output.scan(/^\s+(\S+) -> (\S+) \[label=(.+?)\]/)
+        connections = output.scan(/^\s+(\S+) -> (\S+) \[label="(.+?)"\]/)
         connections.should_not include(['i202x202x202x202', 'i302x302x302x302', '13412'])
+      end
+
+      it 'does not print duplicate connections' do
+        connections = output.scan(/^\s+(\S+) -> (\S+) \[label="(.+?)"\]/)
+        selected_connections = connections.select { |i0, i1, p| i0 == 'i101x101x101x101' && i1 == 'i201x201x201x201' && p == '1234' }
+        selected_connections.should have(1).item
       end
     end
   end

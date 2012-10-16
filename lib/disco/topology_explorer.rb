@@ -28,14 +28,7 @@ module Disco
         trigger(:instance_visited, instance: instance, connections: connections)
         exploration_queue.uniq!
       end
-      deduplicate_connections(topology)
-    end
-
-    private
-
-    def deduplicate_connections(connections)
-      groups = connections.group_by { |c| [c.upstream_instance, c.downstream_instance, c.downstream_port] }
-      groups.map { |_, v| v.first }
+      topology
     end
   end
 end
