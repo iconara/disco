@@ -88,7 +88,7 @@ module Disco
     protected
 
     def command
-      '/usr/sbin/ss --tcp --numeric --info state established'
+      '/usr/sbin/ss --tcp --numeric --info'
     end
   end
 end

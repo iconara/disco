@@ -15,7 +15,7 @@ module Disco
 
     describe '#connections' do
       let :connections do
-        session.stub(:exec!).with('/usr/sbin/ss --tcp --numeric --info state established').and_return(data)
+        session.stub(:exec!).with('/usr/sbin/ss --tcp --numeric --info').and_return(data)
         command.connections(session)
       end
 
