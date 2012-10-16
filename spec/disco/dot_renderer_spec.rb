@@ -3,13 +3,20 @@ require_relative '../spec_helper'
 
 module Disco
   describe DotRenderer do
+    let(:instance101) { stub(:private_ip_address => '101.101.101.101', :name => 'layer101.example.com') }
+    let(:instance102) { stub(:private_ip_address => '102.102.102.102', :name => 'layer102.example.com') }
+    let(:instance201) { stub(:private_ip_address => '201.201.201.201', :name => 'layer201.example.com') }
+    let(:instance202) { stub(:private_ip_address => '202.202.202.202', :name => 'layer202.example.com') }
+    let(:instance301) { stub(:private_ip_address => '301.301.301.301', :name => 'layer301.example.com') }
+    let(:instance302) { stub(:private_ip_address => '302.302.302.302', :name => 'layer302.example.com') }
+
     let :connections do
       [
-        Connection.new(stub(:name => 'layer101.example.com'), stub(:name => 'layer201.example.com'), 1234),
-        Connection.new(stub(:name => 'layer102.example.com'), stub(:name => 'layer201.example.com'), 1234),
-        Connection.new(stub(:name => 'layer201.example.com'), stub(:name => 'layer301.example.com'), 3412),
-        Connection.new(stub(:name => 'layer202.example.com'), stub(:name => 'layer302.example.com'), 3412),
-        Connection.new(stub(:name => 'layer202.example.com'), stub(:name => 'layer302.example.com'), 13412)
+        Connection.new(instance101, instance201, 1234),
+        Connection.new(instance102, instance201, 1234),
+        Connection.new(instance201, instance301, 3412),
+        Connection.new(instance202, instance302, 3412),
+        Connection.new(instance202, instance302, 13412)
       ]
     end
 
@@ -29,7 +36,7 @@ module Disco
       end
 
       it 'prints a digraph onto the specified IO' do
-        output.should include('digraph {')
+        output.should include('digraph topology {')
       end
 
       it 'prints graph settings' do
@@ -37,16 +44,21 @@ module Disco
         output.scan(/node \[(.+?)\]/).flatten.first.should include('shape=rect')
       end
 
+      it 'prints nodes' do
+        nodes = output.scan(/^\s+(\S+) \[label="(.+?)"\]/)
+        nodes.should include(['i102x102x102x102', 'layer102.example.com'])
+      end
+
       it 'prints connections' do
-        connections = output.scan(/^\s+(\S+) -> (\S+) \[label=(.+?)\]/)
-        connections.should include(['layer102.example.com', 'layer201.example.com', '1234'])
-        connections.should include(['layer202.example.com', 'layer302.example.com', '3412'])
+        connections = output.scan(/^\s+(\S+) -> (\S+) \[label="(.+?)"\]/)
+        connections.should include(['i102x102x102x102', 'i201x201x201x201', '1234'])
+        connections.should include(['i202x202x202x202', 'i302x302x302x302', '3412'])
       end
 
       it 'does not include connections rejected by the filter' do
         filter.stub(:include?).with(connections.last).and_return(false)
         connections = output.scan(/^\s+(\S+) -> (\S+) \[label=(.+?)\]/)
-        connections.should_not include(['layer202.example.com', 'layer302.example.com', '13412'])
+        connections.should_not include(['i202x202x202x202', 'i302x302x302x302', '13412'])
       end
     end
   end

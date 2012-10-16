@@ -17,7 +17,7 @@ connection_filter = Disco::PortFilter.new(1..10_000, 27017, 55672)
 renderer = Disco::DotRenderer.new(connection_filter)
 
 connections = JSON.parse(File.read(ARGV.first)).map do |upstream, downstream, port|
-  Disco::Connection.new(instance_cache[upstream], instance_cache[downstream], port)
+  Disco::Connection.new(instances[upstream], instances[downstream], port)
 end
 
 renderer.render(connections)
