@@ -4,11 +4,11 @@ require_relative '../spec_helper'
 module Disco
   describe Connection do
     let :instance0 do
-      stub(:instance0, :name => 'host0', :private_ip_address => '0.0.0.0')
+      stub(:instance0, :id => 'i-00000000')
     end
 
     let :instance1 do
-      stub(:instance1, :name => 'host1', :private_ip_address => '1.1.1.1')
+      stub(:instance1, :id => 'i-11111111')
     end
 
     let :connection do
@@ -16,21 +16,10 @@ module Disco
     end
 
     describe '#to_h' do
-      it 'returns a basic hash with instance name in place of instance' do
+      it 'returns a basic hash with instance ID as proxy for the instance' do
         connection.to_h.should == {
-          :upstream_host => 'host0',
-          :downstream_host => 'host1',
-          :upstream_port => 1,
-          :downstream_port => 2,
-          :properties => {}
-        }
-      end
-
-      it 'uses private IP if name is nil' do
-        instance1.stub(:name).and_return(nil)
-        connection.to_h.should == {
-          :upstream_host => 'host0',
-          :downstream_host => '1.1.1.1',
+          :upstream_host => 'i-00000000',
+          :downstream_host => 'i-11111111',
           :upstream_port => 1,
           :downstream_port => 2,
           :properties => {}
@@ -41,15 +30,15 @@ module Disco
     describe '.from_h' do
       let :instances do
         i = stub(:instances)
-        i.stub(:[]).with('host0').and_return(instance0)
-        i.stub(:[]).with('host1').and_return(instance1)
+        i.stub(:[]).with('i-00000000').and_return(instance0)
+        i.stub(:[]).with('i-11111111').and_return(instance1)
         i
       end
 
       let :hash_string_keys do
         {
-          'upstream_host' => 'host0',
-          'downstream_host' => 'host1',
+          'upstream_host' => 'i-00000000',
+          'downstream_host' => 'i-11111111',
           'upstream_port' => 1,
           'downstream_port' => 2,
           'properties' => {'test' => 123}
@@ -58,8 +47,8 @@ module Disco
 
       let :hash_symbol_keys do
         {
-          :upstream_host => 'host0',
-          :downstream_host => 'host1',
+          :upstream_host => 'i-00000000',
+          :downstream_host => 'i-11111111',
           :upstream_port => 1,
           :downstream_port => 2,
           :properties => {'test' => 123}
@@ -85,7 +74,7 @@ module Disco
       end
 
       it 'raises an error if an instance could not be resolved' do
-        instances.stub(:[]).with('host1').and_return(nil)
+        instances.stub(:[]).with('i-11111111').and_return(nil)
         expect { described_class.from_h(hash_string_keys, instances) }.to raise_error(ArgumentError)
       end
     end

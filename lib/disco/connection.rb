@@ -30,8 +30,8 @@ module Disco
 
     def to_h
       {
-        :upstream_host => upstream_instance.name || upstream_instance.private_ip_address,
-        :downstream_host => downstream_instance.name || downstream_instance.private_ip_address,
+        :upstream_host => upstream_instance.id,
+        :downstream_host => downstream_instance.id,
         :upstream_port => upstream_port,
         :downstream_port => downstream_port,
         :properties => @properties

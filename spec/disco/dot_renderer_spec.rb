@@ -3,12 +3,12 @@ require_relative '../spec_helper'
 
 module Disco
   describe DotRenderer do
-    let(:instance101) { stub(:private_ip_address => '101.101.101.101', :name => 'layer101.example.com') }
-    let(:instance102) { stub(:private_ip_address => '102.102.102.102', :name => 'layer102.example.com') }
-    let(:instance201) { stub(:private_ip_address => '201.201.201.201', :name => 'layer201.example.com') }
-    let(:instance202) { stub(:private_ip_address => '202.202.202.202', :name => 'layer202.example.com') }
-    let(:instance301) { stub(:private_ip_address => '301.301.301.301', :name => 'layer301.example.com') }
-    let(:instance302) { stub(:private_ip_address => '302.302.302.302', :name => 'layer302.example.com') }
+    let(:instance101) { stub(:id => 'i-101a101b', :name => 'layer101.example.com') }
+    let(:instance102) { stub(:id => 'i-102a102b', :name => 'layer102.example.com') }
+    let(:instance201) { stub(:id => 'i-201a201b', :name => 'layer201.example.com') }
+    let(:instance202) { stub(:id => 'i-202a202b', :name => 'layer202.example.com') }
+    let(:instance301) { stub(:id => 'i-301a301b', :name => 'layer301.example.com') }
+    let(:instance302) { stub(:id => 'i-302a302b', :name => 'layer302.example.com') }
 
     let :connections do
       [
@@ -47,24 +47,24 @@ module Disco
 
       it 'prints nodes' do
         nodes = output.scan(/^\s+(\S+) \[label="(.+?)"\]/)
-        nodes.should include(['i102x102x102x102', 'layer102.example.com'])
+        nodes.should include(['i102a102b', 'layer102.example.com'])
       end
 
       it 'prints connections' do
         edges = output.scan(/^\s+(\S+) -> (\S+) \[label="(.+?)"\]/)
-        edges.should include(['i102x102x102x102', 'i201x201x201x201', '1234'])
-        edges.should include(['i202x202x202x202', 'i302x302x302x302', '3412'])
+        edges.should include(['i102a102b', 'i201a201b', '1234'])
+        edges.should include(['i202a202b', 'i302a302b', '3412'])
       end
 
       it 'does not include connections rejected by the filter' do
         filter.stub(:include?).with(connections.last).and_return(false)
         edges = output.scan(/^\s+(\S+) -> (\S+) \[label="(.+?)"\]/)
-        edges.should_not include(['i202x202x202x202', 'i302x302x302x302', '13412'])
+        edges.should_not include(['i202a202b', 'i302a302b', '13412'])
       end
 
       it 'does not print duplicate connections' do
         edges = output.scan(/^\s+(\S+) -> (\S+) \[label="(.+?)"\]/)
-        selected_edges = edges.select { |i0, i1, p| i0 == 'i101x101x101x101' && i1 == 'i201x201x201x201' && p == '1234' }
+        selected_edges = edges.select { |i0, i1, p| i0 == 'i101a101b' && i1 == 'i201a201b' && p == '1234' }
         selected_edges.should have(1).item
       end
 
@@ -80,10 +80,10 @@ module Disco
         io = StringIO.new
         renderer.render(connections, io)
         edges = io.string.scan(/^\s+(\S+) -> (\S+) \[label="(.+?)"\]/)
-        edges.should include(['i101x101x101x101', 'i102x102x102x102', '2000'])
-        edges.should include(['i201x201x201x201', 'i102x102x102x102', '2000'])
-        edges.should include(['i301x301x301x301', 'i302x302x302x302', '2000'])
-        edges.should_not include(['i102x102x102x102', 'i101x101x101x101', '10101'])
+        edges.should include(['i101a101b', 'i102a102b', '2000'])
+        edges.should include(['i201a201b', 'i102a102b', '2000'])
+        edges.should include(['i301a301b', 'i302a302b', '2000'])
+        edges.should_not include(['i102a102b', 'i101a101b', '10101'])
       end
     end
   end

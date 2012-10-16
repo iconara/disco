@@ -5,6 +5,7 @@ module Disco
   describe Instance do
     let :instance do
       Instance.new(
+        'instance_id' => 'i-4b657e12',
         'public_dns_name' => 'ec2-54-247-63-90.eu-west-1.compute.amazonaws.com',
         'private_dns_name' => 'ip-10-51-34-249.eu-west-1.compute.internal',
         'private_ip_address' => '10.51.34.249',
@@ -39,13 +40,14 @@ module Disco
 
       it 'is not equal to a different instance' do
         overrides = {
+          'instance_id' => 'i-234b123c',
           'instance_type' => 'c1.xlarge',
           'private_ip_address' => '10.251.12.4'
         }
         instance.eql?(Instance.new(instance.to_h.merge(overrides))).should be_false
       end
 
-      it 'is equal to a different instance with the same private IP address' do
+      it 'is equal to a different instance with the same instance ID' do
         overrides = {
           'instance_type' => 'c1.xlarge',
           'public_dns_name' => 'ec2-76-212-10-4.eu-west-1.compute.amazonaws.com',

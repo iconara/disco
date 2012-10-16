@@ -6,21 +6,25 @@ module Disco
       @data = data.dup.freeze
     end
 
+    def id
+      instance_id
+    end
+
     def name
       @data['tags']['Name']
     end
 
     def eql?(other)
-      other.respond_to?(:private_ip_address) && self.private_ip_address == other.private_ip_address
+      self.id == other.id
     end
     alias_method :==, :eql?
 
     def hash
-      @h ||= private_ip_address.hash
+      @h ||= id.hash
     end
 
     def to_s
-      @s ||= %[Instance("#{name || private_ip_address}")]
+      @s ||= %[Instance("#{id}", "#{name}")]
     end
 
     def to_h

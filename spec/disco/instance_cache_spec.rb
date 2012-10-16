@@ -6,6 +6,7 @@ module Disco
     let :instances do
       [
         Instance.new(
+          'instance_id' => 'i-f379e599',
           'public_dns_name' => 'ec2-54-247-63-90.eu-west-1.compute.amazonaws.com',
           'private_dns_name' => 'ip-10-51-34-249.eu-west-1.compute.internal',
           'private_ip_address' => '10.51.34.249',
@@ -18,6 +19,7 @@ module Disco
           }
         ),
         Instance.new(
+          'instance_id' => 'i-a79e67b09',
           'public_dns_name' => 'ec2-46-137-20-240.eu-west-1.compute.amazonaws.com',
           'private_dns_name' => 'ip-10-227-201-65.eu-west-1.compute.internal',
           'private_ip_address' => '10.227.201.65',
@@ -37,6 +39,10 @@ module Disco
     end
 
     describe '#get' do
+      it 'finds instances by ID' do
+        registry.get('i-a79e67b09').should == instances[1]
+      end
+
       it 'finds instances by internal DNS name' do
         registry.get('ip-10-227-201-65.eu-west-1.compute.internal').should == instances[1]
       end
@@ -73,9 +79,9 @@ module Disco
         tags1 = {'Name' => 's1.example.com', 'Environment' => 'staging', 'Role' => 'web'}
         tags2 = {'Name' => 'p3.example.com', 'Environment' => 'production', 'Role' => 'web'}
         tags3 = {'Name' => 'p4.example.com', 'Environment' => 'production', 'Role' => 'db'}
-        instances << Instance.new(instances[1].to_h.merge('private_ip_address' => '99.99.99.99', 'tags' => tags1))
-        instances << Instance.new(instances[1].to_h.merge('private_ip_address' => '88.88.88.88', 'tags' => tags2))
-        instances << Instance.new(instances[1].to_h.merge('private_ip_address' => '77.77.77.77', 'tags' => tags3))
+        instances << Instance.new(instances[1].to_h.merge('tags' => tags1))
+        instances << Instance.new(instances[1].to_h.merge('tags' => tags2))
+        instances << Instance.new(instances[1].to_h.merge('tags' => tags3))
       end
 
       it 'finds instances by tag' do
@@ -110,6 +116,7 @@ module Disco
     let :ec2_instance_data do
       [
         stub(
+          :instance_id => 'i-f379e599',
           :public_dns_name => 'ec2-54-247-63-90.eu-west-1.compute.amazonaws.com',
           :private_dns_name => 'ip-10-51-34-249.eu-west-1.compute.internal',
           :private_ip_address => '10.51.34.249',
@@ -122,6 +129,7 @@ module Disco
           :launch_time => 1347865429
         ),
         stub(
+          :instance_id => 'i-a79e67b09',
           :public_dns_name => 'ec2-46-137-20-240.eu-west-1.compute.amazonaws.com',
           :private_dns_name => 'ip-10-227-201-65.eu-west-1.compute.internal',
           :private_ip_address => '10.227.201.65',
@@ -134,6 +142,7 @@ module Disco
           :launch_time => 1344843272
         ),
         stub(
+          :instance_id => 'i-8b675d45',
           :public_dns_name => 'ec2-52-110-25-1.eu-west-1.compute.amazonaws.com',
           :private_dns_name => 'ip-10-32-153-4.eu-west-1.compute.internal',
           :private_ip_address => '10.32.153.4',
@@ -151,6 +160,7 @@ module Disco
     let :cached_data do
       [
         {
+          'instance_id' => 'i-f379e599',
           'public_dns_name' => 'ec2-54-247-63-90.eu-west-1.compute.amazonaws.com',
           'private_dns_name' => 'ip-10-51-34-249.eu-west-1.compute.internal',
           'private_ip_address' => '10.51.34.249',
@@ -163,6 +173,7 @@ module Disco
           }
         },
         {
+          'instance_id' => 'i-a79e67b09',
           'public_dns_name' => 'ec2-46-137-20-240.eu-west-1.compute.amazonaws.com',
           'private_dns_name' => 'ip-10-227-201-65.eu-west-1.compute.internal',
           'private_ip_address' => '10.227.201.65',
@@ -191,14 +202,14 @@ module Disco
       context 'when a cache exists' do
         it 'returns an instance registry with the cached instances' do
           write_cache
-          instance_cache.instances['10.51.34.249'].should == Instance.new(cached_data[0])
+          instance_cache.instances['i-f379e599'].should == Instance.new(cached_data[0])
         end
 
         it 'filters instances through the specified filter' do
           write_cache
           instance_filter.stub(:include?) { |instance| instance.instance_type == 'm1.large' }
-          instance_cache.instances['10.51.34.249'].should_not be_nil
-          instance_cache.instances['10.227.201.65'].should be_nil
+          instance_cache.instances['i-f379e599'].should_not be_nil
+          instance_cache.instances['i-a79e67b09'].should be_nil
         end
       end
 
@@ -209,6 +220,17 @@ module Disco
 
         it 'asks the EC2 service for all instances' do
           instance_cache.instances.should have(3).items
+        end
+
+        it 'saves the right properties' do
+          instance = instance_cache.instances['i-8b675d45']
+          instance.id.should == 'i-8b675d45'
+          instance.public_dns_name.should == 'ec2-52-110-25-1.eu-west-1.compute.amazonaws.com'
+          instance.private_dns_name.should == 'ip-10-32-153-4.eu-west-1.compute.internal'
+          instance.private_ip_address.should == '10.32.153.4'
+          instance.tags.should == {'Name' => 'p2.example.com', 'Environment' => 'production', 'Role' => 'web'}
+          instance.instance_type.should == 'c1.xlarge'
+          instance.launch_time.should == 1344888950
         end
 
         it 'writes the instances to the cache file' do

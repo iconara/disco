@@ -34,6 +34,7 @@ module Disco
       @mappings = {}
       @instances.each do |instance|
         @mappings[instance.name] = instance if instance.name
+        @mappings[instance.id] = instance
         @mappings[instance.public_dns_name] = instance
         @mappings[instance.private_dns_name] = instance
         @mappings[instance.private_ip_address] = instance
@@ -85,6 +86,7 @@ module Disco
       @ec2.instances.each do |instance|
         begin
           data = {
+            'instance_id' => instance.instance_id,
             'public_dns_name' => instance.public_dns_name,
             'private_dns_name' => instance.private_dns_name,
             'private_ip_address' => instance.private_ip_address,

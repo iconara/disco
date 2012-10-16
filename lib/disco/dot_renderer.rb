@@ -49,7 +49,7 @@ module Disco
     end
 
     def node_id(instance)
-      'i' << instance.private_ip_address.gsub('.', 'x')
+      instance.id.sub('-', '')
     end
 
     def deduplicate_connections(connections)
