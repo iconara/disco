@@ -12,15 +12,18 @@ module Disco
 
     def extract_connections(str)
       return [] unless str
-      connections = str.split("\n").flat_map do |line|
-        extract_from_line(line)
+      connections = str.split("\n").map do |line|
+        triplet = extract_from_line(line)
+        if triplet && triplet.all?
+          triplet[0] = @port_mapper.numeric_port(triplet[0])
+          triplet[2] = @port_mapper.numeric_port(triplet[2])
+          triplet
+        else
+          nil
+        end
       end
       connections.compact!
-      connections.map! do |str|
-        h, p = str.scan(/^(.+):([\d\w]+)$/).flatten
-        [h, @port_mapper.numeric_port(p)] if h && p
-      end
-      connections.compact!
+      connections.reject! { |_, host, _| host == '127.0.0.1' }
       connections
     end
 
@@ -43,7 +46,7 @@ module Disco
     end
 
     def extract_from_line(line)
-      line.scan(/(\S+:\d+)\s+\w+\s*$/).first
+      line.scan(/:([^:]+)\s+(\S+):(\d+)\s+\w+\s*$/).first
     end
   end
 
@@ -55,7 +58,7 @@ module Disco
     end
 
     def extract_from_line(line)
-      line.scan(/->(.+?\.compute\.internal:\S+)/).first
+      line.scan(/:(\S+)->(.+?\.compute\.internal):(\S+)/).first
     end
   end
 
@@ -67,7 +70,7 @@ module Disco
     end
 
     def extract_from_line(line)
-      line.scan(/\s+(\S+:\d+)\s+$/).first
+      line.scan(/:(\d+)\s+(\S+):(\d+)\s+$/).first
     end
   end
 end

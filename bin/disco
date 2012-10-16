@@ -40,6 +40,4 @@ end
 
 connections = topology_explorer.discover_topology(ARGV)
 
-flattened_connections = connections.map { |c| [c.upstream.private_ip_address, c.downstream.private_ip_address, c.port] }
-
-puts(flattened_connections.to_json)
+puts(connections.map(&:to_h).to_json)

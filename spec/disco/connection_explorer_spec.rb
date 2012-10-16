@@ -32,17 +32,17 @@ module Disco
     describe '#discover_connections' do
       before do
         ssh_factory.stub(:start).with('host1', 'phil').and_yield(ssh_session)
-        command1.stub(:connections).with(ssh_session).and_return([['host2', 1]], [['host2', 11]], [['host2', 111]])
-        command2.stub(:connections).with(ssh_session).and_return([['host2', 2]])
+        command1.stub(:connections).with(ssh_session).and_return([[99, 'host2', 1]], [[99, 'host2', 11]], [[99, 'host2', 111]])
+        command2.stub(:connections).with(ssh_session).and_return([[99, 'host2', 2]])
       end
 
       it 'connects to the host and runs a command' do
-        explorer.discover_connections(instance1).should == [Connection.new(instance1, instance2, 1)]
+        explorer.discover_connections(instance1).should == [Connection.new(instance1, instance2, 99, 1)]
       end
 
       it 'runs the second command if the first gives an empty list' do
         command1.stub(:connections).and_return([])
-        explorer.discover_connections(instance1).should == [Connection.new(instance1, instance2, 2)]
+        explorer.discover_connections(instance1).should == [Connection.new(instance1, instance2, 99, 2)]
       end
 
       it 'returns an empty list if neither command produces any results' do
@@ -52,17 +52,17 @@ module Disco
       end
 
       it 'does not return anything for hosts not in the instance cache' do
-        command1.stub(:connections).with(ssh_session).and_return([['host2', 1], ['host3', 1]])
-        explorer.discover_connections(instance1).should == [Connection.new(instance1, instance2, 1)]
+        command1.stub(:connections).with(ssh_session).and_return([[99, 'host2', 1], [99, 'host3', 1]])
+        explorer.discover_connections(instance1).should == [Connection.new(instance1, instance2, 99, 1)]
       end
 
       it 'does not return connections to the same host' do
-        command1.stub(:connections).with(ssh_session).and_return([['host2', 1], ['host1', 1]])
-        explorer.discover_connections(instance1).should == [Connection.new(instance1, instance2, 1)]
+        command1.stub(:connections).with(ssh_session).and_return([[99, 'host2', 1], [99, 'host1', 1]])
+        explorer.discover_connections(instance1).should == [Connection.new(instance1, instance2, 99, 1)]
       end
 
       it 'runs the command multiple times' do
-        multisampling_explorer.discover_connections(instance1).should == [Connection.new(instance1, instance2, 1), Connection.new(instance1, instance2, 11), Connection.new(instance1, instance2, 111)]
+        multisampling_explorer.discover_connections(instance1).should == [Connection.new(instance1, instance2, 99, 1), Connection.new(instance1, instance2, 99, 11), Connection.new(instance1, instance2, 99, 111)]
       end
     end
   end

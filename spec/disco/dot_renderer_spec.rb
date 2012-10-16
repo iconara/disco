@@ -12,11 +12,11 @@ module Disco
 
     let :connections do
       [
-        Connection.new(instance101, instance201, 1234),
-        Connection.new(instance102, instance201, 1234),
-        Connection.new(instance201, instance301, 3412),
-        Connection.new(instance202, instance302, 3412),
-        Connection.new(instance202, instance302, 13412)
+        Connection.new(instance101, instance201, 62312, 1234),
+        Connection.new(instance102, instance201, 62312, 1234),
+        Connection.new(instance201, instance301, 62312, 3412),
+        Connection.new(instance202, instance302, 62312, 3412),
+        Connection.new(instance202, instance302, 35345, 13412)
       ]
     end
 

@@ -2,23 +2,53 @@
 
 module Disco
   class Connection
-    attr_reader :upstream, :downstream, :port
+    attr_reader :upstream_instance, :downstream_instance, :upstream_port, :downstream_port
 
     def initialize(*args)
-      @upstream, @downstream, @port = args
+      @upstream_instance, @downstream_instance, @upstream_port, @downstream_port, @properties = args
     end
 
     def eql?(other)
-      self.upstream == other.upstream && self.downstream == other.downstream && self.port == other.port
+      self.upstream_port == other.upstream_port &&
+        self.downstream_port == other.downstream_port &&
+        self.upstream_instance == other.upstream_instance &&
+        self.downstream_instance == other.downstream_instance
     end
     alias_method :==, :eql?
 
     def hash
-      @hash ||= (((upstream.hash * 31) ^ (downstream.hash)) * 31) ^ port
+      @h ||= begin
+        parts = [upstream_instance, downstream_instance, upstream_port, downstream_port]
+        parts.reduce(31) { |h, p| (h & 33554431) * 31 ^ p.hash }
+      end
     end
 
     def to_s
-      @s ||= "Connection(#{upstream}, #{downstream}, #{port})"
+      @s ||= "Connection(#{upstream_instance}, #{downstream_instance}, #{upstream_port}, #{downstream_port})"
+    end
+
+    def to_h
+      {
+        :upstream_host => upstream_instance.name || upstream_instance.private_ip_address,
+        :downstream_host => downstream_instance.name || downstream_instance.private_ip_address,
+        :upstream_port => upstream_port,
+        :downstream_port => downstream_port
+      }
+    end
+
+    def self.from_h(h, instances)
+      upstream_host = h[:upstream_host] || h['upstream_host']
+      downstream_host = h[:downstream_host] || h['downstream_host']
+      upstream_instance = instances[upstream_host]
+      downstream_instance = instances[downstream_host]
+      raise ArgumentError, "Could not find instance for #{upstream_host}" unless upstream_instance
+      raise ArgumentError, "Could not find instance for #{downstream_host}" unless downstream_instance
+      self.new(
+        upstream_instance,
+        downstream_instance,
+        h[:upstream_port] || h['upstream_port'],
+        h[:downstream_port] || h['downstream_port']
+      )
     end
   end
 end

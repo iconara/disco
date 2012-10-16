@@ -23,7 +23,7 @@ module Disco
     end
 
     def include?(connection)
-      @ranges.any? { |rng| rng === connection.port }
+      @ranges.any? { |rng| rng === connection.downstream_port }
     end
   end
 end

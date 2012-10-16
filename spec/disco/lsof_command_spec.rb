@@ -30,17 +30,17 @@ module Disco
         command.connections(session)
       end
 
-      it 'returns all downstream IP/port pairs' do
-        connections.should include(['ip-10-227-121-224.eu-west-1.compute.internal', 6379])
-        connections.should include(['ip-10-227-121-224.eu-west-1.compute.internal', 6379])
+      it 'returns all upstream port/downstream DNS + port triples' do
+        connections.should include([43650, 'ip-10-227-121-224.eu-west-1.compute.internal', 6379])
+        connections.should include([43654, 'ip-10-227-121-224.eu-west-1.compute.internal', 6379])
       end
 
       it 'resolves named ports' do
-        connections.should include(['ip-10-48-83-190.eu-west-1.compute.internal', 5672])
+        connections.should include([48737, 'ip-10-48-83-190.eu-west-1.compute.internal', 5672])
       end
 
       it 'does not return connections to S3' do
-        connections.should_not include('s3-3-w.amazonaws.com', 443)
+        connections.should_not include([33447, 's3-3-w.amazonaws.com', 443])
       end
     end
   end

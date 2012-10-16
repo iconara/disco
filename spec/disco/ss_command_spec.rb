@@ -20,13 +20,13 @@ module Disco
       end
 
       it 'returns all downstream IP/port pairs' do
-        connections.should include(['::ffff:10.53.142.128', 5672])
-        connections.should include(['::ffff:10.48.178.144', 5672])
-        connections.should include(['37.123.148.251', 44379])
+        connections.should include([57831, '::ffff:10.53.142.128', 5672])
+        connections.should include([52785, '::ffff:10.48.178.144', 5672])
+        connections.should include([22, '37.123.148.251', 44379])
       end
 
       it 'does not return connections to localhost' do
-        connections.should_not include('127.0.0.1', 45503)
+        connections.should_not include([4369, '127.0.0.1', 45503])
       end
     end
   end

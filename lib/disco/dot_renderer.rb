@@ -13,7 +13,7 @@ module Disco
       io.puts
 
       instances = connections.flat_map do |c|
-        [c.upstream, c.downstream] if @filter.include?(c)
+        [c.upstream_instance, c.downstream_instance] if @filter.include?(c)
       end
       instances.compact!
       instances.uniq!
@@ -26,7 +26,7 @@ module Disco
 
       connections.each do |c|
         if @filter.include?(c)
-          io.puts(sprintf(%|\t%s -> %s [label="%d"];|, node_id(c.upstream), node_id(c.downstream), c.port))
+          io.puts(sprintf(%|\t%s -> %s [label="%d"];|, node_id(c.upstream_instance), node_id(c.downstream_instance), c.downstream_port))
         end
       end
       io.puts('}')
