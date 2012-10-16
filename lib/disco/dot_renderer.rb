@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 require 'set'
+require 'color-generator'
 
 
 module Disco
@@ -34,7 +35,8 @@ module Disco
 
     def print_nodes(instances, io)
       instances.each do |instance|
-        io.puts(sprintf(%|\t%s [label="%s", fillcolor="%s"];|, node_id(instance), instance.name, @colorizer.color(instance)))
+        label_color, fill_color = @colorizer.colors(instance)
+        io.puts(sprintf(%|\t%s [label="%s", fontcolor="%s", fillcolor="%s"];|, node_id(instance), instance.name, label_color, fill_color))
       end
       io.puts
     end
@@ -78,27 +80,22 @@ module Disco
   end
 
   class NullColorizer
-    def color(instance)
-      'transparent'
+    def colors(instance)
+      ['black', 'transparent']
     end
   end
 
   class TagColorizer
     def initialize(tag)
+      generator = ColorGenerator.new(saturation: 0.5, lightness: 0.3)
       @tag = tag
       @colors = Hash.new do |h, k|
-        h[k] = next_color
+        h[k] = '#' << generator.create
       end
     end
 
-    def color(instance)
-      @colors[instance.tags[@tag]]
-    end
-
-    private
-
-    def next_color
-      '#%2x%2x%2x' % [rand(255), rand(255), rand(255)]
+    def colors(instance)
+      ['white', @colors[instance.tags[@tag]]]
     end
   end
 end

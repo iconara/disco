@@ -27,12 +27,12 @@ module Disco
 
     let :colorizer do
       c = stub(:colorizer)
-      c.stub(:color) do |instance|
+      c.stub(:colors) do |instance|
         case instance.tags['Role']
-        when 'web' then 'red'
-        when 'mq' then 'green'
-        when 'db' then 'blue'
-        else 'black'
+        when 'web' then ['black', 'red']
+        when 'mq' then ['black', 'green']
+        when 'db' then ['white', 'blue']
+        else ['white', 'black']
         end
       end
       c
@@ -105,6 +105,13 @@ module Disco
         edges.should include(['i102a102b', 'red'])
         edges.should include(['i201a201b', 'green'])
         edges.should include(['i302a302b', 'blue'])
+      end
+
+      it 'colorizes labels with the colorizer' do
+        edges = output.scan(/^\s+(\S+) \[.*fontcolor="(.+?)"/)
+        edges.should include(['i102a102b', 'black'])
+        edges.should include(['i201a201b', 'black'])
+        edges.should include(['i302a302b', 'white'])
       end
     end
   end
