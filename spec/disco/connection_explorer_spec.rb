@@ -6,11 +6,11 @@ module Disco
     stubs :ssh_factory, :ssh_session, :command1, :command2
 
     let :instance1 do
-      stub(:instance1, :name => 'host1')
+      stub(:instance1, :public_dns_name => 'host1')
     end
 
     let :instance2 do
-      stub(:instance2, :name => 'host2')
+      stub(:instance2, :public_dns_name => 'host2')
     end
 
     let :instance_cache do
@@ -69,6 +69,11 @@ module Disco
 
       it 'runs the command multiple times' do
         multisampling_explorer.discover_connections(instance1).should == [Connection.new(instance1, instance2, 99, 1), Connection.new(instance1, instance2, 99, 11), Connection.new(instance1, instance2, 99, 111)]
+      end
+
+      it 'raises an error if there is a socket error' do
+        ssh_factory.stub(:start).and_raise(SocketError)
+        expect { explorer.discover_connections(instance1) }.to raise_error(SocketError)
       end
     end
   end

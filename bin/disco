@@ -38,6 +38,10 @@ topology_explorer.on(:instance_visited) do |event|
   $stderr.puts("#{event[:instance].name} had #{event[:connections].size} connections")
 end
 
+topology_explorer.on(:connection_error) do |event|
+  $stderr.puts("Warning: could not visit #{event[:instance].name}: #{event[:error].message}")
+end
+
 connections = topology_explorer.discover_topology(ARGV)
 
 puts(JSON.pretty_generate(connections.map(&:to_h)))

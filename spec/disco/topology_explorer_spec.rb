@@ -41,6 +41,11 @@ module Disco
         topology = explorer.discover_topology(%w[host1])
       end
 
+      it 'ignores nodes that throw socket errors' do
+        connection_explorer.stub(:discover_connections).with(instance2).and_raise(SocketError)
+        expect { explorer.discover_topology(%w[host1]) }.to_not raise_error
+      end
+
       context 'events' do
         it 'triggers an event before visiting an instance' do
           triggered = false
@@ -51,6 +56,13 @@ module Disco
         it 'triggers an event after visiting an instance' do
           triggered = false
           explorer.on(:instance_visited) { |e| triggered = true }
+          expect { explorer.discover_topology(%w[host1]) }.to change { triggered }.to(true)
+        end
+
+        it 'triggers an event on a socket error from the connection explorer' do
+          connection_explorer.stub(:discover_connections).with(instance2).and_raise(SocketError)
+          triggered = false
+          explorer.on(:connection_error) { |e| triggered = true }
           expect { explorer.discover_topology(%w[host1]) }.to change { triggered }.to(true)
         end
       end

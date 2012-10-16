@@ -15,7 +15,7 @@ module Disco
 
     def discover_connections(instance, options={})
       connections = []
-      @ssh_factory.start(instance.name, @username) do |session|
+      @ssh_factory.start(instance.public_dns_name, @username) do |session|
         stop_at = Time.now + @sampling_duration
         begin
           @commands.each do |command|
