@@ -12,24 +12,34 @@ abort('Please specify seeds') unless ARGV.first
 instance_cache_path = File.expand_path('../../.instances.json', __FILE__)
 connection_cache_path = File.expand_path('../../.connections.json', __FILE__)
 
-instance_filter = Disco::ProcFilter.new { |instance| instance.environment == 'staging' }
-ec2 = File.exists?(instance_cache_path) ? nil : AWS::EC2.new(ec2_endpoint: 'ec2.eu-west-1.amazonaws.com')
-instance_cache = Disco::InstanceCache.new(ec2, instance_cache_path, instance_filter)
+instance_filter = Disco::ProcFilter.new { |instance| instance.tags['Environment'] == 'staging' }
+
+if File.exists?(instance_cache_path)
+  instance_cache = Disco::InstanceCache.new(instance_cache_path, nil, instance_filter)
+else
+  ec2 = AWS::EC2.new(ec2_endpoint: 'ec2.eu-west-1.amazonaws.com')
+  instance_cache = Disco::InstanceCache.new(instance_cache_path, ec2, instance_filter)
+  instance_cache.on(:instance_loaded) do |event|
+    $stderr.puts("Loaded #{event[:instance].name}")
+  end
+end
+
+instances = instance_cache.instances
 services = Disco::ServicePortMapper.new(custom: {'apani1' => 9160})
 discovery_commands = [Disco::SsCommand.new(services)]
-connection_explorer = Disco::ConnectionExplorer.new(discovery_commands, instance_cache, username: 'burt', sampling_duration: 2.0)
-topology_explorer = Disco::TopologyExplorer.new(connection_explorer, instance_cache)
+connection_explorer = Disco::ConnectionExplorer.new(discovery_commands, instances, username: 'burt', sampling_duration: 10.0)
+topology_explorer = Disco::TopologyExplorer.new(connection_explorer, instances)
 
-topology_explorer.on :visit_instance do |event|
+topology_explorer.on(:visit_instance) do |event|
   $stderr.puts("Visiting #{event[:instance].name}")
 end
 
-topology_explorer.on :instance_visited do |event|
+topology_explorer.on(:instance_visited) do |event|
   $stderr.puts("#{event[:instance].name} had #{event[:connections].size} connections")
 end
 
 connections = topology_explorer.discover_topology(ARGV)
 
-flattened_connections = connections.map { |c| [c.upstream.name, c.downstream.name, c.port] }
+flattened_connections = connections.map { |c| [c.upstream.private_ip_address, c.downstream.private_ip_address, c.port] }
 
 puts(flattened_connections.to_json)

@@ -8,11 +8,12 @@ module Disco
     include EventDispatch
 
     def initialize(*args)
-      @connection_explorer, @instance_cache = args
+      @connection_explorer, @instances = args
     end
 
     def discover_topology(seed_nodes)
-      exploration_queue = seed_nodes.map { |name| @instance_cache[name] }
+      exploration_queue = seed_nodes.map { |name| @instances[name] }
+      exploration_queue.compact!
       topology = Set.new
       visited_instances = Set.new
       while instance = exploration_queue.pop

@@ -12,7 +12,7 @@ module Disco
       io.puts("\tnode [shape=rect];")
       connections.each do |c|
         if @filter.include?(c)
-          io.puts(sprintf("\t%s -> %s [label=%d];", c.upstream.short_name, c.downstream.short_name, c.port))
+          io.puts(sprintf("\t%s -> %s [label=%d];", c.upstream.name, c.downstream.name, c.port))
         end
       end
       io.puts('}')

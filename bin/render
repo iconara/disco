@@ -7,11 +7,12 @@ require 'json'
 require 'disco'
 
 
-abort('Please specify connections file') unless ARGV.first
-
 instance_cache_path = File.expand_path('../../.instances.json', __FILE__)
 
-instance_cache = Disco::InstanceCache.new(nil, instance_cache_path)
+abort('Please specify connections file') unless ARGV.first
+abort('Please re-run disco to recreate the instance cache') unless File.exists?(instance_cache_path)
+
+instances = Disco::InstanceCache.new(instance_cache_path).instances
 connection_filter = Disco::PortFilter.new(1..10_000, 27017, 55672)
 renderer = Disco::DotRenderer.new(connection_filter)
 
