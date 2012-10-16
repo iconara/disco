@@ -22,6 +22,14 @@ topology_explorer = Disco::TopologyExplorer.new(connection_explorer, instance_ca
 
 instance_cache.cache!
 
+topology_explorer.on :visit_instance do |event|
+  $stderr.puts("Visiting #{event[:instance].name}")
+end
+
+topology_explorer.on :instance_visited do |event|
+  $stderr.puts("#{event[:instance].name} had #{event[:connections].size} connections")
+end
+
 connections = topology_explorer.discover_topology(ARGV)
 
 flattened_connections = connections.map { |c| [c.upstream.name, c.downstream.name, c.port] }

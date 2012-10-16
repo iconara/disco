@@ -3,6 +3,7 @@
 require 'disco/connection'
 require 'disco/connection_explorer'
 require 'disco/dot_renderer'
+require 'disco/event_dispatch'
 require 'disco/filters'
 require 'disco/instance'
 require 'disco/instance_cache'

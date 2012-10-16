@@ -40,6 +40,20 @@ module Disco
         connection_explorer.stub(:discover_connections).with(instance2).and_return([Disco::Connection.new(instance2, instance3, 2), Disco::Connection.new(instance2, instance3, 3), Disco::Connection.new(instance2, instance3, 4)])
         topology = explorer.discover_topology(%w[host1])
       end
+
+      context 'events' do
+        it 'triggers an event before visiting an instance' do
+          triggered = false
+          explorer.on(:visit_instance) { |e| triggered = true }
+          expect { explorer.discover_topology(%w[host1]) }.to change { triggered }.to(true)
+        end
+
+        it 'triggers an event after visiting an instance' do
+          triggered = false
+          explorer.on(:instance_visited) { |e| triggered = true }
+          expect { explorer.discover_topology(%w[host1]) }.to change { triggered }.to(true)
+        end
+      end
     end
   end
 end
