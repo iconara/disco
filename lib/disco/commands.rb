@@ -58,4 +58,16 @@ module Disco
       line.scan(/->(.+?\.compute\.internal:\S+)/).first
     end
   end
+
+  class SsCommand < ConnectionCommand
+    protected
+
+    def command
+      '/usr/sbin/ss --tcp --numeric --info state established'
+    end
+
+    def extract_from_line(line)
+      line.scan(/\s+(\S+:\d+)\s+$/).first
+    end
+  end
 end
