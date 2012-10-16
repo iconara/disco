@@ -40,4 +40,4 @@ end
 
 connections = topology_explorer.discover_topology(ARGV)
 
-puts(connections.map(&:to_h).to_json)
+puts(JSON.pretty_generate(connections.map(&:to_h)))
