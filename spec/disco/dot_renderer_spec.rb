@@ -51,21 +51,39 @@ module Disco
       end
 
       it 'prints connections' do
-        connections = output.scan(/^\s+(\S+) -> (\S+) \[label="(.+?)"\]/)
-        connections.should include(['i102x102x102x102', 'i201x201x201x201', '1234'])
-        connections.should include(['i202x202x202x202', 'i302x302x302x302', '3412'])
+        edges = output.scan(/^\s+(\S+) -> (\S+) \[label="(.+?)"\]/)
+        edges.should include(['i102x102x102x102', 'i201x201x201x201', '1234'])
+        edges.should include(['i202x202x202x202', 'i302x302x302x302', '3412'])
       end
 
       it 'does not include connections rejected by the filter' do
         filter.stub(:include?).with(connections.last).and_return(false)
-        connections = output.scan(/^\s+(\S+) -> (\S+) \[label="(.+?)"\]/)
-        connections.should_not include(['i202x202x202x202', 'i302x302x302x302', '13412'])
+        edges = output.scan(/^\s+(\S+) -> (\S+) \[label="(.+?)"\]/)
+        edges.should_not include(['i202x202x202x202', 'i302x302x302x302', '13412'])
       end
 
       it 'does not print duplicate connections' do
-        connections = output.scan(/^\s+(\S+) -> (\S+) \[label="(.+?)"\]/)
-        selected_connections = connections.select { |i0, i1, p| i0 == 'i101x101x101x101' && i1 == 'i201x201x201x201' && p == '1234' }
-        selected_connections.should have(1).item
+        edges = output.scan(/^\s+(\S+) -> (\S+) \[label="(.+?)"\]/)
+        selected_edges = edges.select { |i0, i1, p| i0 == 'i101x101x101x101' && i1 == 'i201x201x201x201' && p == '1234' }
+        selected_edges.should have(1).item
+      end
+
+      it 'chooses directions based on the speed property' do
+        connections = [
+          Connection.new(instance101, instance102, 10101, 2000, {'speed' => '10Mbps'}),
+          Connection.new(instance102, instance101, 2000, 10101, {'speed' => '2Mbps'}),
+          Connection.new(instance102, instance201, 2000, 30303, {'speed' => '1Mbps'}),
+          Connection.new(instance201, instance102, 30303, 2000, {'speed' => '20Mbps'}),
+          Connection.new(instance301, instance302, 1000, 2000, {'speed' => '30Mbps'}),
+          Connection.new(instance302, instance301, 2000, 1000, {'speed' => '1Mbps'})
+        ]
+        io = StringIO.new
+        renderer.render(connections, io)
+        edges = io.string.scan(/^\s+(\S+) -> (\S+) \[label="(.+?)"\]/)
+        edges.should include(['i101x101x101x101', 'i102x102x102x102', '2000'])
+        edges.should include(['i201x201x201x201', 'i102x102x102x102', '2000'])
+        edges.should include(['i301x301x301x301', 'i302x302x302x302', '2000'])
+        edges.should_not include(['i102x102x102x102', 'i101x101x101x101', '10101'])
       end
     end
   end
