@@ -2,6 +2,8 @@
 
 module Disco
   class Instance
+    EC2_PROPERTIES = %w[instance_id public_dns_name private_dns_name private_ip_address instance_type launch_time availability_zone].map(&:to_sym)
+
     def initialize(data)
       @data = data.dup.freeze
     end
@@ -11,7 +13,11 @@ module Disco
     end
 
     def name
-      @data['tags']['Name']
+      tags['Name']
+    end
+
+    def tags
+      @data['tags']
     end
 
     def eql?(other)
@@ -31,12 +37,10 @@ module Disco
       @data
     end
 
-    def respond_to?(method_name)
-      @data.key?(method_name.to_s)
-    end
-
-    def method_missing(method_name, *args)
-      @data[method_name.to_s]
+    EC2_PROPERTIES.each do |property|
+      define_method(property) do
+        @data[property.to_s]
+      end
     end
   end
 end

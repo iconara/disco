@@ -17,7 +17,7 @@ instance_filter = Disco::ProcFilter.new { |instance| instance.tags['Environment'
 if File.exists?(instance_cache_path)
   instance_cache = Disco::InstanceCache.new(instance_cache_path, nil, instance_filter)
 else
-  ec2 = AWS::EC2.new(ec2_endpoint: 'ec2.eu-west-1.amazonaws.com')
+  ec2 = Disco::Ec2.new(AWS, ec2_endpoint: 'ec2.eu-west-1.amazonaws.com')
   instance_cache = Disco::InstanceCache.new(instance_cache_path, ec2, instance_filter)
   instance_cache.on(:instance_loaded) do |event|
     $stderr.puts("Loaded #{event[:instance].name}")

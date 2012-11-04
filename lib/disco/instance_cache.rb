@@ -83,17 +83,10 @@ module Disco
 
     def find_instances
       @instances = []
-      @ec2.instances.each do |instance|
+      @ec2.each_instance do |instance|
         begin
-          data = {
-            'instance_id' => instance.instance_id,
-            'public_dns_name' => instance.public_dns_name,
-            'private_dns_name' => instance.private_dns_name,
-            'private_ip_address' => instance.private_ip_address,
-            'instance_type' => instance.instance_type,
-            'launch_time' => instance.launch_time.to_i,
-            'tags' => Hash[instance.tags.map { |k, v| [k, v] }]
-          }
+          data = Hash[Instance::EC2_PROPERTIES.map { |property| [property.to_s, instance.send(property)] }]
+          data['tags'] = Hash[instance.tags.map { |k, v| [k, v] }]
           instance = Instance.new(data)
           trigger(:instance_loaded, instance: instance)
           @instances << instance
@@ -102,6 +95,19 @@ module Disco
           sleep(5)
           retry
         end
+      end
+    end
+  end
+
+  class Ec2
+    def initialize(aws, properties={})
+      @aws = aws
+      @ec2 = @aws::EC2.new(properties)
+    end
+
+    def each_instance(&block)
+      @aws.memoize do
+        @ec2.instances.each(&block)
       end
     end
   end

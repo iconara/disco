@@ -12,6 +12,7 @@ module Disco
           'private_ip_address' => '10.51.34.249',
           'instance_type' => 'm1.large',
           'launch_time' => 1347865429,
+          'availability_zone' => 'eu-west-1a',
           'tags' => {
             'Name' => 's1.example.com',
             'Environment' => 'staging',
@@ -25,6 +26,7 @@ module Disco
           'private_ip_address' => '10.227.201.65',
           'instance_type' => 'c1.xlarge',
           'launch_time' => 1344843272,
+          'availability_zone' => 'eu-west-1b',
           'tags' => {
             'Name' => 'p1.example.com',
             'Environment' => 'production',
@@ -126,7 +128,8 @@ module Disco
             'Role' => 'cruncher'
           },
           :instance_type => 'm1.large',
-          :launch_time => 1347865429
+          :launch_time => 1347865429,
+          :availability_zone => 'eu-west-1a'
         ),
         stub(
           :instance_id => 'i-a79e67b09',
@@ -139,7 +142,8 @@ module Disco
             'Role' => 'web'
           },
           :instance_type => 'c1.xlarge',
-          :launch_time => 1344843272
+          :launch_time => 1344843272,
+          :availability_zone => 'eu-west-1a'
         ),
         stub(
           :instance_id => 'i-8b675d45',
@@ -152,7 +156,8 @@ module Disco
             'Role' => 'web'
           },
           :instance_type => 'c1.xlarge',
-          :launch_time => 1344888950
+          :launch_time => 1344888950,
+          :availability_zone => 'eu-west-1b'
         )
       ]
     end
@@ -170,7 +175,8 @@ module Disco
             'Name' => 's1.example.com',
             'Environment' => 'staging',
             'Role' => 'cruncher'
-          }
+          },
+          'availability_zone' => 'eu-west-1a'
         },
         {
           'instance_id' => 'i-a79e67b09',
@@ -183,7 +189,8 @@ module Disco
             'Name' => 'p1.example.com',
             'Environment' => 'production',
             'Role' => 'web'
-          }
+          },
+          'availability_zone' => 'eu-west-1a'
         }
       ]
     end
@@ -215,7 +222,9 @@ module Disco
 
       context 'when no cache exists' do
         before do
-          ec2.stub(:instances).and_return(ec2_instance_data)
+          ec2_instance_data.reduce(ec2.stub(:each_instance)) do |stub, instance|
+            stub.and_yield(instance)
+          end
         end
 
         it 'asks the EC2 service for all instances' do
@@ -231,6 +240,7 @@ module Disco
           instance.tags.should == {'Name' => 'p2.example.com', 'Environment' => 'production', 'Role' => 'web'}
           instance.instance_type.should == 'c1.xlarge'
           instance.launch_time.should == 1344888950
+          instance.availability_zone.should == 'eu-west-1b'
         end
 
         it 'writes the instances to the cache file' do
