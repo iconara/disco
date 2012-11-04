@@ -1,1 +1,1 @@
-rvm --create use 1.9.3@disco
+rvm --create use 1.9.3-p194@disco
