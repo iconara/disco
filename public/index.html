@@ -12,18 +12,6 @@
       overflow: hidden;
     }
 
-    rect {
-      fill: #fff;
-    }
-
-    .node {
-    }
-
-    .node.focused {
-      stroke: #999;
-      stroke-width: 3px;
-    }
-
     .link {
       stroke: #999;
       stroke-width: 1px;
@@ -33,6 +21,19 @@
       font-family: Helvetica;
       font-size: 10px;
       fill: #999;
+      pointer-events: none;
+    }
+
+    .node.focused,
+    .link.focused {
+      stroke: #444;
+      stroke-width: 3px;
+    }
+
+    .label.focused {
+      fill: #444;
+      font-weight: bold;
+      font-size: 12px;
     }
     </style>
     <script src="app/lib/d3.v2.min.js"></script>
@@ -224,6 +225,22 @@
           .attr("y", utils.pluck("y"))
       }
 
+      var nodeMouseOver = function (d) {
+        d3.select(this).classed("focused", true)
+        linksGroup.selectAll("line.link").classed("focused", function (dd) {
+          return dd.source.id == d.id || dd.target.id == d.id
+        })
+        labelsGroup.selectAll("text.label").classed("focused", function (dd) {
+          return dd.id == d.id
+        })
+      }
+
+      var nodeMouseOut = function (d) {
+        d3.select(this).classed("focused", false)
+        linksGroup.selectAll("line.link").classed("focused", false)
+        labelsGroup.selectAll("text.label").classed("focused", false)
+      }
+
       self.update = function () {
         linksGroup.selectAll("line.link")
           .data(topologyManager.links(), function (d) { return [d.source.id, d.target.id].join("-") })
@@ -236,10 +253,10 @@
           .enter()
           .insert("svg:circle")
             .attr("class", "node")
-            .attr("r", 5)
+            .attr("r", 10)
             .attr("fill", function (d) { return colors(topologyManager.apps().indexOf(d.app)) })
-            .on("mouseover", function (d) { d3.select(this).classed("focused", true) })
-            .on("mouseout", function (d) { d3.select(this).classed("focused", false) })
+            .on("mouseover", nodeMouseOver)
+            .on("mouseout", nodeMouseOut)
             .call(forceLayout.drag)
 
         labelsGroup.selectAll("text.label")
@@ -247,7 +264,7 @@
           .enter()
           .insert("svg:text")
             .attr("class", "label")
-            .attr("dx", 8)
+            .attr("dx", 15)
             .attr("dy", 4)
             .text(utils.pluck("name"))
 
