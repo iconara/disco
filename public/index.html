@@ -39,147 +39,6 @@
   </head>
   <body>
     <script>
-    var hosts = [
-      {"id": "iaf3f3fe7", "name": "stagingapi101",        "app": "api"},
-      {"id": "i124ab959", "name": "stagingassembler110",  "app": "assembler"},
-      {"id": "i2847f563", "name": "stagingassembler111",  "app": "assembler"},
-      {"id": "i26c4a86f", "name": "stagingbfly101",       "app": "butterflies"},
-      {"id": "i92c6aadb", "name": "stagingbfly102",       "app": "butterflies"},
-      {"id": "i2210736b", "name": "stagingcass101",       "app": "butterflies"},
-      {"id": "i2415766d", "name": "stagingcass102",       "app": "butterflies"},
-      {"id": "i483add03", "name": "stagingblitz101",      "app": "blitz"},
-      {"id": "i423add09", "name": "stagingblitz102",      "app": "blitz"},
-      {"id": "i1a759251", "name": "stagingblitzdb101",    "app": "blitz"},
-      {"id": "i6e749325", "name": "stagingblitzdb102",    "app": "blitz"},
-      {"id": "i1676915d", "name": "stagingblitzdb103",    "app": "blitz"},
-      {"id": "iba21c6f1", "name": "stagingblitzex101",    "app": "blitz"},
-      {"id": "i4c20c707", "name": "stagingblitzex102",    "app": "blitz"},
-      {"id": "i1ec72955", "name": "stagingblitzjob101",   "app": "blitz"},
-      {"id": "i5012f51b", "name": "stagingblitzredis101", "app": "blitz"},
-      {"id": "i9a16f1d1", "name": "stagingmqblitz101",    "app": "blitz"},
-      {"id": "i802ba3c9", "name": "stagingcrunch102"  ,   "app": "crunch"},
-      {"id": "i8e47a2c5", "name": "stagingcrunchdb101",   "app": "crunch"},
-      {"id": "ia647a2ed", "name": "stagingcrunchdb102",   "app": "crunch"},
-      {"id": "ia247a2e9", "name": "stagingcrunchdb103",   "app": "crunch"},
-      {"id": "i0e46a345", "name": "stagingcrunchdb104",   "app": "crunch"},
-      {"id": "i3446a37f", "name": "stagingcrunchdb105",   "app": "crunch"},
-      {"id": "ic646a38d", "name": "stagingcrunchdb106",   "app": "crunch"},
-      {"id": "ic219918b", "name": "stagingdeco101",       "app": "decorator"},
-      {"id": "ic81a9281", "name": "stagingdeco102",       "app": "decorator"},
-      {"id": "i18d1b151", "name": "stagingdecodb101",     "app": "decorator"},
-      {"id": "i18ec6751", "name": "stagingjob101",        "app": "metrixer"},
-      {"id": "ia4ec67ed", "name": "stagingjob102",        "app": "metrixer"},
-      {"id": "iac274de5", "name": "stagingmqcoll101",     "app": "mqcoll"},
-      {"id": "i283a5061", "name": "stagingmqcoll102",     "app": "mqcoll"},
-      {"id": "i3ecb5177", "name": "stagingmqcrunch101",   "app": "mqcrunch"},
-      {"id": "i80c953c9", "name": "stagingmqcrunch102",   "app": "mqcrunch"},
-      {"id": "i55aa9a1d", "name": "stagingparser102",     "app": "porc"},
-      {"id": "i4bab9b03", "name": "stagingparser103",     "app": "porc"},
-      {"id": "i5262171b", "name": "stagingrfalog101",     "app": "porc"},
-      {"id": "i806c19c9", "name": "stagingrfalog102",     "app": "porc"},
-      {"id": "i46f3090d", "name": "stagingsearch101",     "app": "elastics"},
-      {"id": "i3615ef7d", "name": "stagingsearch102",     "app": "elastics"},
-      {"id": "id0420f99", "name": "stagingsunjob01",      "app": "job"},
-      {"id": "i6622aa2f", "name": "stagingunicrunch101",  "app": "uniqorn"},
-      {"id": "i8623abcf", "name": "stagingunicrunch102",  "app": "uniqorn"},
-      {"id": "i34f87e7f", "name": "stagingunidb101",      "app": "uniqorn"}
-    ]
-
-    var connections = [
-      {"source": "i55aa9a1d", "target": "iac274de5", "port": "5672"},
-      {"source": "i55aa9a1d", "target": "i283a5061", "port": "5672"},
-      {"source": "i124ab959", "target": "i283a5061", "port": "5672"},
-      {"source": "i2847f563", "target": "i283a5061", "port": "5672"},
-      {"source": "i4bab9b03", "target": "i283a5061", "port": "5672"},
-      {"source": "i5262171b", "target": "i283a5061", "port": "5672"},
-      {"source": "i806c19c9", "target": "i283a5061", "port": "5672"},
-      {"source": "i806c19c9", "target": "iac274de5", "port": "5672"},
-      {"source": "i5262171b", "target": "iac274de5", "port": "5672"},
-      {"source": "i4bab9b03", "target": "iac274de5", "port": "5672"},
-      {"source": "i2847f563", "target": "iac274de5", "port": "5672"},
-      {"source": "i2847f563", "target": "i80c953c9", "port": "5672"},
-      {"source": "ic81a9281", "target": "i80c953c9", "port": "5672"},
-      {"source": "i802ba3c9", "target": "i80c953c9", "port": "5672"},
-      {"source": "i4c20c707", "target": "i80c953c9", "port": "5672"},
-      {"source": "ic219918b", "target": "i80c953c9", "port": "5672"},
-      {"source": "i18ec6751", "target": "i80c953c9", "port": "5672"},
-      {"source": "iba21c6f1", "target": "i80c953c9", "port": "5672"},
-      {"source": "i80c953c9", "target": "id0420f99", "port": "39397"},
-      {"source": "ia4ec67ed", "target": "i80c953c9", "port": "5672"},
-      {"source": "i8623abcf", "target": "i80c953c9", "port": "5672"},
-      {"source": "i6622aa2f", "target": "i80c953c9", "port": "5672"},
-      {"source": "i6622aa2f", "target": "i34f87e7f", "port": "6379"},
-      {"source": "i6622aa2f", "target": "i3ecb5177", "port": "5672"},
-      {"source": "i8623abcf", "target": "i34f87e7f", "port": "6379"},
-      {"source": "i8623abcf", "target": "i3ecb5177", "port": "5672"},
-      {"source": "ia4ec67ed", "target": "i8e47a2c5", "port": "27017"},
-      {"source": "ia4ec67ed", "target": "i0e46a345", "port": "27017"},
-      {"source": "ia4ec67ed", "target": "ia647a2ed", "port": "27017"},
-      {"source": "ia4ec67ed", "target": "i3ecb5177", "port": "5672"},
-      {"source": "ia4ec67ed", "target": "i3446a37f", "port": "27017"},
-      {"source": "ia4ec67ed", "target": "i34f87e7f", "port": "6379"},
-      {"source": "i18ec6751", "target": "i3446a37f", "port": "27017"},
-      {"source": "i0e46a345", "target": "i3446a37f", "port": "27017"},
-      {"source": "i802ba3c9", "target": "i3446a37f", "port": "27017"},
-      {"source": "i3446a37f", "target": "ic646a38d", "port": "27017"},
-      {"source": "ic646a38d", "target": "i0e46a345", "port": "27017"},
-      {"source": "i18ec6751", "target": "ia647a2ed", "port": "27017"},
-      {"source": "i8e47a2c5", "target": "ia647a2ed", "port": "27017"},
-      {"source": "ic219918b", "target": "ia647a2ed", "port": "27017"},
-      {"source": "ic81a9281", "target": "ia647a2ed", "port": "27017"},
-      {"source": "ia247a2e9", "target": "ia647a2ed", "port": "27017"},
-      {"source": "iaf3f3fe7", "target": "ia647a2ed", "port": "27017"},
-      {"source": "iaf3f3fe7", "target": "i8e47a2c5", "port": "27017"},
-      {"source": "ia247a2e9", "target": "i8e47a2c5", "port": "27017"},
-      {"source": "i802ba3c9", "target": "i0e46a345", "port": "27017"},
-      {"source": "i18ec6751", "target": "i0e46a345", "port": "27017"},
-      {"source": "i18ec6751", "target": "i8e47a2c5", "port": "27017"},
-      {"source": "ic81a9281", "target": "i8e47a2c5", "port": "27017"},
-      {"source": "ic219918b", "target": "i8e47a2c5", "port": "27017"},
-      {"source": "iba21c6f1", "target": "i9a16f1d1", "port": "5672"},
-      {"source": "iba21c6f1", "target": "i3ecb5177", "port": "5672"},
-      {"source": "i1ec72955", "target": "i9a16f1d1", "port": "5672"},
-      {"source": "i4c20c707", "target": "i9a16f1d1", "port": "5672"},
-      {"source": "ic81a9281", "target": "i9a16f1d1", "port": "5672"},
-      {"source": "ic219918b", "target": "i9a16f1d1", "port": "5672"},
-      {"source": "i1ec72955", "target": "i6e749325", "port": "27017"},
-      {"source": "i1ec72955", "target": "i1a759251", "port": "27017"},
-      {"source": "i1ec72955", "target": "i34f87e7f", "port": "6379"},
-      {"source": "i1a759251", "target": "i6e749325", "port": "27017"},
-      {"source": "i423add09", "target": "i1a759251", "port": "27017"},
-      {"source": "i1a759251", "target": "i1676915d", "port": "27017"},
-      {"source": "i483add03", "target": "i1a759251", "port": "27017"},
-      {"source": "i483add03", "target": "i5012f51b", "port": "6379"},
-      {"source": "i483add03", "target": "i6e749325", "port": "27017"},
-      {"source": "i483add03", "target": "i9a16f1d1", "port": "55672"},
-      {"source": "i6e749325", "target": "i1676915d", "port": "27017"},
-      {"source": "i423add09", "target": "i5012f51b", "port": "6379"},
-      {"source": "i423add09", "target": "i9a16f1d1", "port": "55672"},
-      {"source": "i423add09", "target": "i6e749325", "port": "27017"},
-      {"source": "ic81a9281", "target": "i3ecb5177", "port": "5672"},
-      {"source": "i802ba3c9", "target": "i3ecb5177", "port": "5672"},
-      {"source": "ic219918b", "target": "i3ecb5177", "port": "5672"},
-      {"source": "i46f3090d", "target": "i3ecb5177", "port": "5672"},
-      {"source": "i3ecb5177", "target": "id0420f99", "port": "40105"},
-      {"source": "i4c20c707", "target": "i3ecb5177", "port": "5672"},
-      {"source": "i124ab959", "target": "i3ecb5177", "port": "5672"},
-      {"source": "i3615ef7d", "target": "i46f3090d", "port": "9300"},
-      {"source": "i18ec6751", "target": "i34f87e7f", "port": "6379"},
-      {"source": "ic219918b", "target": "i92c6aadb", "port": "1337"},
-      {"source": "ic219918b", "target": "i26c4a86f", "port": "1337"},
-      {"source": "ic219918b", "target": "i18d1b151", "port": "6379"},
-      {"source": "ic81a9281", "target": "i18d1b151", "port": "6379"},
-      {"source": "i26c4a86f", "target": "i2415766d", "port": "9160"},
-      {"source": "i26c4a86f", "target": "i2210736b", "port": "9160"},
-      {"source": "ic81a9281", "target": "i26c4a86f", "port": "1337"},
-      {"source": "i92c6aadb", "target": "i2210736b", "port": "9160"},
-      {"source": "i2415766d", "target": "i2210736b", "port": "7000"},
-      {"source": "i92c6aadb", "target": "i2415766d", "port": "9160"},
-      {"source": "ic81a9281", "target": "i92c6aadb", "port": "1337"},
-      {"source": "i802ba3c9", "target": "i92c6aadb", "port": "8085"},
-      {"source": "i124ab959", "target": "iac274de5", "port": "5672"}
-    ]
-
     var uniq = function (list) {
       var uniqueList = []
       var lastItem = null
@@ -202,150 +61,156 @@
       }
     }
 
-    var apps = uniq(hosts.map(pluck("app")))
-
-    // var colors = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#a65628", "#f781bf"]
-    var colors = d3.scale.linear().range(["#e41a1c", "#984ea3"]).interpolate(d3.interpolateHcl)
-
-    var w = window.innerWidth
-    var h = window.innerHeight
-    var nodes = []
-    var links = []
-
-    var vis = d3.select("body")
-      .append("svg:svg")
-        .attr("width", w)
-        .attr("height", h)
-
-    var linksGroup = vis.append("svg:g").attr("class", "links")
-    var nodesGroup = vis.append("svg:g").attr("class", "nodes")
-    var labelsGroup = vis.append("svg:g").attr("class", "labels")
-
-    var force = d3.layout.force()
-        .nodes(nodes)
-        .links(links)
-        .linkDistance(100)
-        .charge(-400)
-        .size([w, h])
-
-    var findNodeIndex = function (id) {
-      for (var i = 0; i < nodes.length; i++) {
-        if (nodes[i].id == id) {
-          return i
-        }
-      }
-      return -1
+    var width = function () {
+      return window.innerWidth
     }
 
-    var findHost = function (id) {
-      for (var i = 0; i < hosts.length; i++) {
-        if (hosts[i].id == id) {
-          return hosts[i]
-        }
-      }
-      return null
+    var height = function () {
+      return window.innerHeight
     }
 
-    var isCandidate = function (id) {
-      for (var i = 0; i < candidates.length; i++) {
-        if (candidates[i].id == id) {
-          return true
-        }
-      }
-      return false
-    }
+    d3.json("data/staging.json", function (data) {
+      var apps = uniq(data.hosts.map(pluck("app")))
 
-    var candidates = [hosts[Math.floor(Math.random() * hosts.length)]]
+      // var colors = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#a65628", "#f781bf"]
+      var colors = d3.scale.linear().range(["#e41a1c", "#984ea3"]).interpolate(d3.interpolateHcl)
 
-    setTimeout(function () {
-      if (candidates.length > 0) {
-        var host = candidates.shift()
-        var node = {id: host.id, name: host.name, app: host.app}
-        connections.forEach(function (connection) {
-          var link = {target: -1, source: -1}
-          if (connection.target == node.id) {
-            link.target = nodes.length
-            link.source = findNodeIndex(connection.source)
-          } else if (connection.source == node.id) {
-            link.target = findNodeIndex(connection.target)
-            link.source = nodes.length
+      var nodes = []
+      var links = []
+
+      var vis = d3.select("body")
+        .append("svg:svg")
+          .attr("width", width())
+          .attr("height", height())
+
+      var linksGroup = vis.append("svg:g").attr("class", "links")
+      var nodesGroup = vis.append("svg:g").attr("class", "nodes")
+      var labelsGroup = vis.append("svg:g").attr("class", "labels")
+
+      var force = d3.layout.force()
+          .nodes(nodes)
+          .links(links)
+          .linkDistance(100)
+          .charge(-400)
+          .size([width(), height()])
+
+      var findNodeIndex = function (id) {
+        for (var i = 0; i < nodes.length; i++) {
+          if (nodes[i].id == id) {
+            return i
           }
-          if (link.source != -1 && link.target != -1) {
-            links.push(link)
-          } else if (link.source != -1 && link.target == -1) {
-            var host = findHost(connection.target)
-            if (host != null && !isCandidate(host.id)) {
-              candidates.push(host)
-            }
-          } else if (link.source == -1 && link.target != -1) {
-            var host = findHost(connection.source)
-            if (host != null && !isCandidate(host.id)) {
-              candidates.push(host)
-            }
+        }
+        return -1
+      }
+
+      var findHost = function (id) {
+        for (var i = 0; i < data.hosts.length; i++) {
+          if (data.hosts[i].id == id) {
+            return data.hosts[i]
           }
-        })
-        nodes.push(node)
+        }
+        return null
+      }
+
+      var isCandidate = function (id) {
+        for (var i = 0; i < candidates.length; i++) {
+          if (candidates[i].id == id) {
+            return true
+          }
+        }
+        return false
+      }
+
+      var candidates = [data.hosts[Math.floor(Math.random() * data.hosts.length)]]
+
+      setTimeout(function () {
+        if (candidates.length > 0) {
+          var host = candidates.shift()
+          var node = {id: host.id, name: host.name, app: host.app}
+          data.connections.forEach(function (connection) {
+            var link = {target: -1, source: -1}
+            if (connection.target == node.id) {
+              link.target = nodes.length
+              link.source = findNodeIndex(connection.source)
+            } else if (connection.source == node.id) {
+              link.target = findNodeIndex(connection.target)
+              link.source = nodes.length
+            }
+            if (link.source != -1 && link.target != -1) {
+              links.push(link)
+            } else if (link.source != -1 && link.target == -1) {
+              var host = findHost(connection.target)
+              if (host != null && !isCandidate(host.id)) {
+                candidates.push(host)
+              }
+            } else if (link.source == -1 && link.target != -1) {
+              var host = findHost(connection.source)
+              if (host != null && !isCandidate(host.id)) {
+                candidates.push(host)
+              }
+            }
+          })
+          nodes.push(node)
+          update()
+          setTimeout(arguments.callee, 1000)
+        }
+      }, 1000)
+
+      force.on("tick", function () {
+        linksGroup.selectAll("line.link")
+            .attr("x1", pluck("source.x"))
+            .attr("y1", pluck("source.y"))
+            .attr("x2", pluck("target.x"))
+            .attr("y2", pluck("target.y"))
+
+        nodesGroup.selectAll("circle.node")
+            .attr("cx", pluck("x"))
+            .attr("cy", pluck("y"))
+
+        labelsGroup.selectAll("text.label")
+            .attr("x", pluck("x"))
+            .attr("y", pluck("y"))
+      })
+
+      var update = function () {
+        linksGroup.selectAll("line.link")
+          .data(links, function (d) { return [d.source.id, d.target.id].join("-") })
+          .enter()
+          .insert("svg:line", "circle.node")
+            .attr("class", "link")
+
+        nodesGroup.selectAll("circle.node")
+          .data(nodes, pluck("id"))
+          .enter()
+          .insert("svg:circle")
+            .attr("class", "node")
+            .attr("r", 5)
+            .attr("fill", function (d) { return colors(apps.indexOf(d.app)) })
+            .on("mouseover", function (d) { d3.select(this).classed("focused", true) })
+            .on("mouseout", function (d) { d3.select(this).classed("focused", false) })
+            .call(force.drag)
+
+        labelsGroup.selectAll("text.label")
+          .data(nodes, pluck("id"))
+          .enter()
+          .insert("svg:text")
+            .attr("class", "label")
+            .attr("dx", 8)
+            .attr("dy", 4)
+            .text(pluck("name"))
+
+        force.size([width(), height()])
+        force.start()
+      }
+
+      window.onresize = function () {
+        vis.attr("width", width()).attr("height", height())
+        force.size([width(), height()])
         update()
-        setTimeout(arguments.callee, 1000)
       }
-    }, 1000)
 
-    force.on("tick", function () {
-      linksGroup.selectAll("line.link")
-          .attr("x1", pluck("source.x"))
-          .attr("y1", pluck("source.y"))
-          .attr("x2", pluck("target.x"))
-          .attr("y2", pluck("target.y"))
-
-      nodesGroup.selectAll("circle.node")
-          .attr("cx", pluck("x"))
-          .attr("cy", pluck("y"))
-
-      labelsGroup.selectAll("text.label")
-          .attr("x", pluck("x"))
-          .attr("y", pluck("y"))
-    })
-
-    var update = function () {
-      linksGroup.selectAll("line.link")
-        .data(links, function (d) { return [d.source.id, d.target.id].join("-") })
-        .enter()
-        .insert("svg:line", "circle.node")
-          .attr("class", "link")
-
-      nodesGroup.selectAll("circle.node")
-        .data(nodes, pluck("id"))
-        .enter()
-        .insert("svg:circle")
-          .attr("class", "node")
-          .attr("r", 5)
-          .attr("fill", function (d) { return colors(apps.indexOf(d.app)) })
-          .on("mouseover", function (d) { d3.select(this).classed("focused", true) })
-          .on("mouseout", function (d) { d3.select(this).classed("focused", false) })
-          .call(force.drag)
-
-      labelsGroup.selectAll("text.label")
-        .data(nodes, pluck("id"))
-        .enter()
-        .insert("svg:text")
-          .attr("class", "label")
-          .attr("dx", 8)
-          .attr("dy", 4)
-          .text(pluck("name"))
-
-      force.size([w, h])
-      force.start()
-    }
-
-    window.onresize = function () {
-      w = window.innerWidth
-      h = window.innerHeight
-      vis.attr("width", w).attr("height", h)
-      force.size([w, h])
       update()
-    }
-
-    update()
+    })
     </script>
   </body>
 </html>
