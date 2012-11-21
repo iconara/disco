@@ -39,7 +39,9 @@
   </head>
   <body>
     <script>
-    var uniq = function (list) {
+    var utils = {}
+
+    utils.uniq = function (list) {
       var uniqueList = []
       var lastItem = null
       list.sort().forEach(function (item) {
@@ -50,7 +52,7 @@
       return uniqueList
     }
 
-    var pluck = function (property) {
+    utils.pluck = function (property) {
       var components = property.split(".")
       return function (obj) {
         var o = obj
@@ -66,7 +68,7 @@
 
     var createTopologyManager = function (topology) {
       var self = {}
-      var apps = uniq(topology.hosts.map(pluck("app")))
+      var apps = utils.uniq(topology.hosts.map(utils.pluck("app")))
       var nodes = []
       var links = []
 
@@ -208,18 +210,18 @@
 
       var layoutUpdate = function () {
         linksGroup.selectAll("line.link")
-          .attr("x1", pluck("source.x"))
-          .attr("y1", pluck("source.y"))
-          .attr("x2", pluck("target.x"))
-          .attr("y2", pluck("target.y"))
+          .attr("x1", utils.pluck("source.x"))
+          .attr("y1", utils.pluck("source.y"))
+          .attr("x2", utils.pluck("target.x"))
+          .attr("y2", utils.pluck("target.y"))
 
         nodesGroup.selectAll("circle.node")
-          .attr("cx", pluck("x"))
-          .attr("cy", pluck("y"))
+          .attr("cx", utils.pluck("x"))
+          .attr("cy", utils.pluck("y"))
 
         labelsGroup.selectAll("text.label")
-          .attr("x", pluck("x"))
-          .attr("y", pluck("y"))
+          .attr("x", utils.pluck("x"))
+          .attr("y", utils.pluck("y"))
       }
 
       self.update = function () {
@@ -230,7 +232,7 @@
             .attr("class", "link")
 
         nodesGroup.selectAll("circle.node")
-          .data(topologyManager.nodes(), pluck("id"))
+          .data(topologyManager.nodes(), utils.pluck("id"))
           .enter()
           .insert("svg:circle")
             .attr("class", "node")
@@ -241,13 +243,13 @@
             .call(forceLayout.drag)
 
         labelsGroup.selectAll("text.label")
-          .data(topologyManager.nodes(), pluck("id"))
+          .data(topologyManager.nodes(), utils.pluck("id"))
           .enter()
           .insert("svg:text")
             .attr("class", "label")
             .attr("dx", 8)
             .attr("dy", 4)
-            .text(pluck("name"))
+            .text(utils.pluck("name"))
 
         forceLayout.size([width(), height()])
         forceLayout.start()
