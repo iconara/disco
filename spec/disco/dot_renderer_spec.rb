@@ -82,14 +82,14 @@ module Disco
         selected_edges.should have(1).item
       end
 
-      it 'chooses directions based on the speed property' do
+      it 'chooses directions based on the network speed metadata' do
         connections = [
-          Connection.new(instance101, instance102, 10101, 2000, {'speed' => '10Mbps'}),
-          Connection.new(instance102, instance101, 2000, 10101, {'speed' => '2Mbps'}),
-          Connection.new(instance102, instance201, 2000, 30303, {'speed' => '1Mbps'}),
-          Connection.new(instance201, instance102, 30303, 2000, {'speed' => '20Mbps'}),
-          Connection.new(instance301, instance302, 1000, 2000, {'speed' => '30Mbps'}),
-          Connection.new(instance302, instance301, 2000, 1000, {'speed' => '1Mbps'})
+          Connection.new(instance101, instance102, 10101, 2000, {'send' => '10Mbps'}),
+          Connection.new(instance102, instance101, 2000, 10101, {'send' => '2Mbps'}),
+          Connection.new(instance102, instance201, 2000, 30303, {'send' => '1Mbps'}),
+          Connection.new(instance201, instance102, 30303, 2000, {'send' => '20Mbps'}),
+          Connection.new(instance301, instance302, 1000, 2000, {'send' => '30Mbps'}),
+          Connection.new(instance302, instance301, 2000, 1000, {'send' => '1Mbps'})
         ]
         io = StringIO.new
         renderer.render(connections, io)

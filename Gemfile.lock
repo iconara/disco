@@ -35,4 +35,5 @@ DEPENDENCIES
   aws-sdk
   color-generator
   net-ssh
+  nokogiri
   rspec

@@ -2,7 +2,9 @@
 
 require 'disco/connection'
 require 'disco/connection_explorer'
+require 'disco/renderer_utils'
 require 'disco/dot_renderer'
+require 'disco/gexf_renderer'
 require 'disco/event_dispatch'
 require 'disco/filters'
 require 'disco/instance'
