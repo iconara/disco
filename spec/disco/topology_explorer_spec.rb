@@ -47,6 +47,18 @@ module Disco
       end
 
       context 'events' do
+        it 'triggers an event when it starts' do
+          triggered = false
+          explorer.on(:start_exploration) { |e| triggered = true }
+          expect { explorer.discover_topology(%w[host1]) }.to change { triggered }.to(true)
+        end
+
+        it 'triggers an event when it ends' do
+          triggered = false
+          explorer.on(:exploration_complete) { |e| triggered = true }
+          expect { explorer.discover_topology(%w[host1]) }.to change { triggered }.to(true)
+        end
+
         it 'triggers an event before visiting an instance' do
           triggered = false
           explorer.on(:visit_instance) { |e| triggered = true }
