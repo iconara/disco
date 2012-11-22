@@ -8,8 +8,12 @@ require 'ipaddr'
 module Disco
   class InstanceRegistry
     def initialize(instances)
-      @instances = instances
+      @instances = instances.dup.freeze
       make_mappings
+    end
+
+    def all
+      @instances
     end
 
     def get(name)
@@ -70,15 +74,19 @@ module Disco
     end
 
     def read_cache
-      if File.exists?(@cache_path)
+      if @cache_path && File.exists?(@cache_path)
         @instances = JSON.parse(File.read(@cache_path)).map { |data| Instance.new(data) }
+      end
+      if @instances
         @instances = @instances.select { |instance| @instance_filter.include?(instance) }
         @registry = InstanceRegistry.new(@instances)
       end
     end
 
     def write_cache
-      File.open(@cache_path, 'w') { |io| io.write(JSON.pretty_generate(@instances.map(&:to_h))) }
+      if @cache_path
+        File.open(@cache_path, 'w') { |io| io.write(JSON.pretty_generate(@instances.map(&:to_h))) }
+      end
     end
 
     def find_instances

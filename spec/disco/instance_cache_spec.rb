@@ -94,6 +94,12 @@ module Disco
         registry.find('Role' => 'web', 'Environment' => 'production').should == [instances[1], instances[3]]
       end
     end
+
+    describe '#all' do
+      it 'returns a list of all instances' do
+        registry.all.should have(2).items
+      end
+    end
   end
 
   describe InstanceCache do
@@ -253,6 +259,34 @@ module Disco
           instance_cache.on(:instance_loaded) { |e| triggered = true }
           expect { instance_cache.instances }.to change { triggered }.to(true)
         end
+      end
+
+      context 'when caching is off' do
+        let :instance_cache do
+          described_class.new(nil, ec2, instance_filter)
+        end
+
+        before do
+          ec2_instance_data.reduce(ec2.stub(:each_instance)) do |stub, instance|
+            stub.and_yield(instance)
+          end
+        end
+
+        it 'asks the EC2 service for all instances' do
+          instance_cache.instances.should have(3).items
+        end
+
+        it 'does not read the cache file' do
+          ec2.stub(:each_instance) # do not yield
+          write_cache
+          instance_cache.instances['i-f379e599'].should be_nil
+        end
+
+        it 'does not write the instances to the cache file' do
+          instance_cache.instances
+          File.exists?(cache_path).should be_false, 'expected the cache file not to exist'
+        end
+
       end
     end
   end
