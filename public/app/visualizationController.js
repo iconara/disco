@@ -1,11 +1,9 @@
 (function (w) {
-  var colors = function () {
-    var alternatives = ["#ff8964", "#6f2b15", "#bc5837", "#0a6f58", "#37bc9e", "#6e431a", "#bb6d23", "#09596e", "#49d8ff", "#bb7123", "#6e451a", "#7b2ebb", "#cb8cff"]
-    alternatives = alternatives.sort(function (a, b) { return Math.round(Math.random() - 0.5)})
-    return function (i) {
-      return alternatives[i % alternatives.length]
-    }
-  }()
+  var COLORS = ["#ff8964", "#6f2b15", "#bc5837", "#0a6f58", "#37bc9e", "#6e431a", "#bb6d23", "#09596e", "#49d8ff", "#bb7123", "#6e451a", "#7b2ebb", "#cb8cff"]
+
+  var colors = function (i) {
+    return COLORS[i % COLORS.length]
+  }
 
   w.createVisualizationController = function (d3, win, topologyManager) {
     var self = {}
