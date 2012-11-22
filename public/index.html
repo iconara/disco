@@ -13,37 +13,49 @@
     }
 
     body {
-      background-color: rgb(25, 25, 25);
+      background-color: #191919;
     }
 
     .node {
-      stroke: rgb(76, 76, 76);
+      stroke: #444444;
       stroke-width: 3px;
     }
 
     .link {
-      stroke: rgb(76, 76, 76);
+      stroke: #444444;
       stroke-width: 3px;
     }
 
-    .label {
+    .label,
+    .labelHighlight {
       font-family: Helvetica;
       font-size: 12px;
       font-weight: bold;
-      fill: rgb(153, 153, 153);
+      fill: #999999;
       pointer-events: none;
+    }
+
+    .labelHighlight {
+      display: none;
     }
 
     .node.focused,
     .link.focused {
-      stroke: rgb(230, 230, 230);
+      stroke: #dddddd;
       stroke-width: 5px;
     }
 
-    .label.focused {
-      fill: rgb(230, 230, 230);
-      font-weight: bold;
+    .label.focused,
+    .labelHighlight.focused {
+      fill: #eeeeee;
+      fill-opacity: 1.0;
       font-size: 14px;
+    }
+
+    .labelHighlight.focused {
+      fill: #444444;
+      display: block;
+      filter: url(#blur);
     }
     </style>
     <script src="app/lib/d3.v2.min.js"></script>
@@ -94,6 +106,16 @@
 
       self.randomHost = function () {
         return topology.hosts[Math.floor(Math.random() * topology.hosts.length)]
+      }
+
+      self.areConnected = function (id1, id2) {
+        for (var i = 0; i < topology.connections.length; i++) {
+          var c = topology.connections[i]
+          if ((c.source == id1 && c.target == id2) || (c.source == id2 && c.target == id1)) {
+            return true
+          }
+        }
+        return false
       }
 
       var findHost = function (id) {
@@ -186,6 +208,7 @@
       var linksGroup = null
       var nodesGroup = null
       var labelsGroup = null
+      var labelHighlightsGroup = null
       var forceLayout = null
 
       win.onresize = resizeUpdate
@@ -205,6 +228,7 @@
 
         linksGroup = svg.append("svg:g").attr("class", "links")
         nodesGroup = svg.append("svg:g").attr("class", "nodes")
+        labelHighlightsGroup = svg.append("svg:g").attr("class", "labelHighlights")
         labelsGroup = svg.append("svg:g").attr("class", "labels")
 
         forceLayout = d3.layout.force()
@@ -215,7 +239,31 @@
           .size([width(), height()])
           .on("tick", layoutUpdate)
 
+        addBlurFilter(svg.append("svg:defs"))
+
         self.update()
+      }
+
+      var addBlurFilter = function (defs) {
+        // magic from http://bl.ocks.org/1502762
+        var filter = defs.append("svg:filter")
+          .attr("id", "blur")
+          .attr("filterUnits", "userSpaceOnUse")
+          .attr("width", "150%")
+          .attr("height", "150%");
+        filter.append("svg:feGaussianBlur")
+          .attr("in", "SourceGraphic")
+          .attr("stdDeviation", 4)
+          .attr("result", "blur-out")
+        filter.append("svg:feOffset")
+          .attr("in", "blur-out")
+          .attr("dx", 0)
+          .attr("dy", 0)
+          .attr("result", "offset-out")
+        filter.append("svg:feBlend")
+          .attr("in", "SourceGraphic")
+          .attr("in2", "offset-out")
+          .attr("mode", "normal")
       }
 
       var resizeUpdate = function () {
@@ -225,35 +273,43 @@
       }
 
       var layoutUpdate = function () {
-        linksGroup.selectAll("line.link")
+        linksGroup.selectAll(".link")
           .attr("x1", utils.pluck("source.x"))
           .attr("y1", utils.pluck("source.y"))
           .attr("x2", utils.pluck("target.x"))
           .attr("y2", utils.pluck("target.y"))
 
-        nodesGroup.selectAll("circle.node")
+        nodesGroup.selectAll(".node")
           .attr("cx", utils.pluck("x"))
           .attr("cy", utils.pluck("y"))
 
-        labelsGroup.selectAll("text.label")
+        labelsGroup.selectAll(".label")
+          .attr("x", utils.pluck("x"))
+          .attr("y", utils.pluck("y"))
+
+        labelHighlightsGroup.selectAll(".labelHighlight")
           .attr("x", utils.pluck("x"))
           .attr("y", utils.pluck("y"))
       }
 
       var nodeMouseOver = function (d) {
-        d3.select(this).classed("focused", true)
-        linksGroup.selectAll("line.link").classed("focused", function (dd) {
+        var nodeFocus = function (dd) {
+          return dd.id == d.id || topologyManager.areConnected(dd.id, d.id)
+        }
+        var labelFocus = function (dd) {}
+        nodesGroup.selectAll(".node").classed("focused", nodeFocus)
+        labelsGroup.selectAll(".label").classed("focused", nodeFocus)
+        labelHighlightsGroup.selectAll(".labelHighlight").classed("focused", nodeFocus)
+        linksGroup.selectAll(".link").classed("focused", function (dd) {
           return dd.source.id == d.id || dd.target.id == d.id
-        })
-        labelsGroup.selectAll("text.label").classed("focused", function (dd) {
-          return dd.id == d.id
         })
       }
 
       var nodeMouseOut = function (d) {
-        d3.select(this).classed("focused", false)
-        linksGroup.selectAll("line.link").classed("focused", false)
-        labelsGroup.selectAll("text.label").classed("focused", false)
+        nodesGroup.selectAll(".node").classed("focused", false)
+        linksGroup.selectAll(".link").classed("focused", false)
+        labelsGroup.selectAll(".label").classed("focused", false)
+        labelHighlightsGroup.selectAll(".labelHighlight").classed("focused", false)
       }
 
       self.update = function () {
@@ -281,6 +337,19 @@
             .attr("class", "label")
             .attr("dx", 15)
             .attr("dy", 4)
+            .attr("fill-opacity", 1.0)
+            .text(utils.pluck("name"))
+          .transition()
+            .duration(3000)
+            .attr("fill-opacity", 0.0)
+
+        labelHighlightsGroup.selectAll("text.labelHighlight")
+          .data(topologyManager.nodes(), utils.pluck("id"))
+          .enter()
+          .insert("svg:text")
+            .attr("class", "labelHighlight")
+            .attr("dx", 15)
+            .attr("dy", 4)
             .text(utils.pluck("name"))
 
         forceLayout.size([width(), height()])
@@ -303,7 +372,7 @@
         } else {
           clearInterval(intervalId)
         }
-      }, 1000)
+      }, 100)
     })
     </script>
   </body>
