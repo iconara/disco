@@ -211,8 +211,6 @@
       var labelHighlightsGroup = null
       var forceLayout = null
 
-      win.onresize = resizeUpdate
-
       var width = function () {
         return win.innerWidth
       }
@@ -241,6 +239,8 @@
 
         addBlurFilter(svg.append("svg:defs"))
 
+        win.addEventListener("resize", resizeUpdate)
+
         self.update()
       }
 
@@ -267,6 +267,7 @@
       }
 
       var resizeUpdate = function () {
+        console.log("resizeUpdate")
         svg.attr("width", width()).attr("height", height())
         forceLayout.size([width(), height()])
         self.update()
