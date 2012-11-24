@@ -120,7 +120,7 @@ class ExplorerControlHandler
             begin
               @topology_explorer.discover_topology([seed])
             rescue => e
-              $stderr.puts("AARGH: #{e.message}")
+              $stderr.puts("AARGH: #{e.message} (#{e.class.name})")
             end
           end
           response.status(200)
