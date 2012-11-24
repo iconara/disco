@@ -1,0 +1,154 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+
+$: << File.expand_path('../../lib', __FILE__)
+
+require 'aws'
+require 'json'
+require 'disco'
+require 'webbit'
+
+
+module JavaConcurrent
+  include_package 'java.util.concurrent'
+end
+
+class HostsHandler
+  include Webbit::HttpHandler
+
+  def initialize(instance_registry)
+    @instance_registry = instance_registry
+  end
+
+  def handleHttpRequest(request, response, control)
+    json = JSON.pretty_generate(@instance_registry.all.map(&:to_h))
+    response.content(json).header('Content-Type', 'application/json').end
+  end
+end
+
+class EventsHandler
+  include Webbit::EventSourceHandler
+
+  def initialize(topology_explorer)
+    @connections = []
+    @broadcasts = []
+    @topology_explorer = topology_explorer
+    @topology_explorer.on(:start_exploration, &method(:start_exploration))
+    @topology_explorer.on(:visit_instance, &method(:visit_instance))
+    @topology_explorer.on(:instance_visited, &method(:instance_visited))
+  end
+
+  def onOpen(connection)
+    $stderr.puts('Connection open')
+    @connections << connection
+    send_message(connection, 'hello', '')
+    $stderr.puts("Replaying #{@broadcasts.size} messages")
+    @broadcasts.each do |event, message|
+      send_message(connection, event, message)
+    end
+  end
+
+  def onClose(connection)
+    @connections.delete(connection)
+  end
+
+  private
+
+  def broadcast(event, message)
+    @broadcasts << [event, message]
+    @connections.each do |connection|
+      send_message(connection, event, message)
+    end
+  end
+
+  def send_message(connection, event, message)
+    message = Webbit::EventSourceMessage.new(message).event(event)
+    connection.send(message)
+  end
+
+  def start_exploration(event)
+    $stderr.puts('Resetting broadcasts')
+    @broadcasts = []
+  end
+
+  def visit_instance(event)
+    plain_event = {:host => event[:instance].to_h}
+    broadcast('visit', plain_event.to_json)
+    $stderr.puts("visit #{event[:instance].name}")
+  end
+
+  def instance_visited(event)
+    connections = event[:connections].map do |c|
+      {
+        :upstream_host => c.upstream_instance.to_h,
+        :downstream_host => c.downstream_instance.to_h,
+        :upstream_port => c.upstream_port,
+        :downstream_port => c.downstream_port
+      }
+    end
+    plain_event = {
+      :host => event[:instance].to_h,
+      :connections => connections
+    }
+    broadcast('visited', plain_event.to_json)
+
+
+    instance_name = event[:instance].name
+    all_connections = event[:connections].flat_map { |c| [c.upstream_instance.name, c.downstream_instance.name] }.uniq - [instance_name]
+    $stderr.puts("visited #{instance_name}, connections: #{all_connections.join(', ')}")
+  end
+end
+
+class ExplorerControlHandler
+  def initialize(*args)
+    @topology_explorer, @executor = args
+    @current_disco = nil
+  end
+
+  def handleHttpRequest(request, response, control)
+    if request.method == 'POST'
+      if @current_disco && !@current_disco.done?
+        response.status(409)
+      else
+        request_obj = JSON.parse(request.body)
+        seed = request_obj && request_obj['seed']
+        if seed && !seed.strip.empty?
+          @current_disco = @executor.submit do
+            $stderr.puts("Starting discovery from #{seed}")
+            begin
+              @topology_explorer.discover_topology([seed])
+            rescue => e
+              $stderr.puts("AARGH: #{e.message}")
+            end
+          end
+          response.status(200)
+        else
+          response.status(400)
+        end
+      end
+    else
+      response.status(405)
+    end
+    response.end
+  end
+end
+
+ec2 = Disco::Ec2.new(AWS, ec2_endpoint: 'ec2.eu-west-1.amazonaws.com')
+instances = Disco::InstanceCache.new('.instances.json', ec2).instances
+services = Disco::ServicePortMapper.new(custom: {'apani1' => 9160})
+discovery_commands = [Disco::SsCommand.new(services)]
+connection_explorer = Disco::ConnectionExplorer.new(discovery_commands, instances, username: 'burt', sampling_duration: 10.0)
+topology_explorer = Disco::TopologyExplorer.new(connection_explorer, instances)
+exploration_executor = JavaConcurrent::Executors.new_cached_thread_pool
+hosts_handler = HostsHandler.new(instances)
+events_handler = EventsHandler.new(topology_explorer)
+explorer_control_handler = ExplorerControlHandler.new(topology_explorer, exploration_executor)
+
+server = Webbit.start_server(3000) do
+  map '/hosts' => hosts_handler
+  map '/events' => events_handler
+  map %r'^/disco/.+' => explorer_control_handler
+  map :static => 'public'
+end
+
+$stderr.puts("Server running on #{server.uri}")

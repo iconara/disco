@@ -1,19 +1,24 @@
 <!DOCTYPE html>
 
-<html>
+<html ng-app="disco">
   <head>
     <title>Disco</title>
     <link rel="stylesheet" type="text/css" href="styles/app.css"/>
+    <script src="app/lib/angular.min.js"></script>
     <script src="app/lib/d3.v2.min.js"></script>
+    <script src="app/modules.js"></script>
+    <script src="app/services.js"></script>
+    <script src="app/directives/topology.js"></script>
+    <script src="app/controllers.js"></script>
+    <!-- 
     <script src="app/utils.js"></script>
     <script src="app/topologyManager.js"></script>
     <script src="app/topologyBuilder.js"></script>
     <script src="app/visualizationController.js"></script>
     <script src="app/main.js"></script>
+    -->
   </head>
-  <body>
-    <script>
-    main()
-    </script>
+  <body ng-controller="AppController">
+    <topology nodes="topology.nodes" links="topology.links"></topology>
   </body>
 </html>
