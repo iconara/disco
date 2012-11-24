@@ -49,7 +49,8 @@ var AppController = function ($scope, $rootScope, $http, hostsManager, discovery
   })
 
   discoveryEvents.addEventListener("done", function (e) {
-    $scope.topology.current = null
+    console.log("DONE!")
+    $scope.current = null
     $scope.$digest()
   })
 
