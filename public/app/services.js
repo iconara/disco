@@ -8,6 +8,18 @@
     }
   }
 
+  var uniq = function (list) {
+    var uniqueList = []
+    var lastItem = null
+    list.sort().forEach(function (item) {
+      if (item != lastItem) {
+        uniqueList.push(item)
+      }
+      lastItem = item
+    })
+    return uniqueList
+  }
+
   var discoModule = angular.module("disco")
 
   discoModule.factory("discoveryEvents", function ($window) {
@@ -62,7 +74,7 @@
     }
 
     self.apps = function () {
-      return hosts.map(function (host) { return parseApp(host.tags.Name) })
+      return uniq(hosts.map(function (host) { return parseApp(host.tags.Name) }))
     }
 
     return self
@@ -90,7 +102,7 @@
     var addNodeFromHost = function (host) {
       var node = {
         id: host.instance_id,
-        name: host.tags.Name,
+        name: host.tags.Name.replace(".byburt.com", ""),
         app: parseApp(host.tags.Name),
         index: nodes.length
       }

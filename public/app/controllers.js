@@ -2,10 +2,30 @@ var AppController = function ($scope, $rootScope, $http, hostsManager, discovery
   $scope.topology = {
     nodes: topologyManager.nodes(),
     links: topologyManager.links(),
-    current: null,
   }
 
+  $scope.colors = [
+    "#ff8964",
+    "#6f2b15",
+    "#bc5837",
+    "#0a6f58",
+    "#37bc9e",
+    "#6e431a",
+    "#bb6d23",
+    "#09596e",
+    "#49d8ff",
+    "#bb7123",
+    "#6e451a",
+    "#7b2ebb",
+    "#cb8cff",
+    "#8f2100",
+    "#006566",
+    "#59404f",
+    "#cc5069"
+  ]
+  
   $scope.apps = null
+  $scope.current = null
 
   var start = function () {
     $scope.apps = hostsManager.apps()
@@ -19,7 +39,7 @@ var AppController = function ($scope, $rootScope, $http, hostsManager, discovery
   }
 
   discoveryEvents.addEventListener("visit", function (e) {
-    $scope.topology.current = topologyManager.addHost(e.data.host)
+    $scope.current = topologyManager.addHost(e.data.host)
     $scope.$digest()
   })
 

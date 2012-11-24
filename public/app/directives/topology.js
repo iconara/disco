@@ -2,12 +2,6 @@
   var discoModule = angular.module("disco")
 
   discoModule.directive("topology", function (d3, $window) {
-    var COLORS = ["#ff8964", "#6f2b15", "#bc5837", "#0a6f58", "#37bc9e", "#6e431a", "#bb6d23", "#09596e", "#49d8ff", "#bb7123", "#6e451a", "#7b2ebb", "#cb8cff"]
-
-    var colors = function (i) {
-      return COLORS[i % COLORS.length]
-    }
-
     return {
       restrict: "E",
       template: '<div></div>',
@@ -15,6 +9,8 @@
       link: function(scope, element, attrs) {
         var currentNode = null
         var apps = []
+        var allColors = []
+        var colors = function (i) { return "white" }
 
         scope.$watch(attrs.nodes, function (newNodes) {
           forceLayout.nodes(newNodes)
@@ -32,7 +28,17 @@
         }, true)
 
         scope.$watch(attrs.apps, function (newApps) {
-          apps = newApps
+          apps = newApps || []
+          updateColors()
+          update()
+        })
+
+        scope.$watch(attrs.colors, function (newColors) {
+          if (newColors) {
+            allColors = newColors.map(function (c) { return {color: c} })
+            colors = function (i) { return allColors[i % allColors.length].color }
+          }
+          updateColors()
           update()
         })
 
@@ -92,17 +98,6 @@
             .attr("mode", "normal")
         }
 
-        var uniq = function (list) {
-          var uniqueList = []
-          var lastItem = null
-          list.sort().forEach(function (item) {
-            if (item != lastItem) {
-              uniqueList.push(item)
-            }
-          })
-          return uniqueList
-        }
-
         var pluck = function (property) {
           var components = property.split(".")
           return function (obj) {
@@ -114,9 +109,56 @@
           }
         }
 
+        var updateColors = function () {
+          if (allColors) {
+            var colorsGroup = svg.select("g.colors")
+
+            if (colorsGroup.empty()) {
+              colorsGroup = svg.insert("svg:g").attr("class", "colors")
+            }
+            
+            var nodeWidth = width()/allColors.length
+            var nodeHeight = 10
+            var selectedHeight = 30
+
+            colorsGroup.attr("transform", "translate(0, " + (height() - selectedHeight) + ")")
+
+            var colorNodes = colorsGroup.selectAll("rect.color")
+              .data(allColors, function (d) { return d.color })
+
+            var textNodes = colorsGroup.selectAll("text.app")
+              .data(apps, function (d) { return d })
+
+            colorNodes.enter()
+              .insert("rect")
+              .attr("class", "color")
+              .on("mouseover", function (d) { d.selected = true; updateColors() })
+              .on("mouseout", function (d) { d.selected = false; updateColors() })
+
+            textNodes.enter()
+              .insert("text")
+              .attr("class", "app")
+
+            colorNodes
+              .attr("x", function (d, i) { return i * nodeWidth })
+              .attr("y", function (d, i) { return d.selected ? 0 : selectedHeight - nodeHeight })
+              .attr("width", function (d) { return nodeWidth })
+              .attr("height", function (d) { return d.selected ? selectedHeight : nodeHeight })
+              .attr("fill", function (d, i) { return colors(i) })
+
+            textNodes
+              .attr("x", function (d, i) { return (i % allColors.length) * nodeWidth })
+              .attr("y", function (d, i) { return -5 })
+              .attr("dy", function (d, i) { return -12 * Math.floor(i/allColors.length) })
+              .attr("display", function (d, i) { return allColors[i % allColors.length].selected ? "block" : "none" })
+              .text(function (d) { return d })
+          }
+        }
+
         var resizeUpdate = function () {
           svg.attr("width", width()).attr("height", height())
           forceLayout.size([width(), height()])
+          updateColors()
           update()
         }
 
@@ -196,6 +238,7 @@
               .attr("fill-opacity", 1.0)
               .text(pluck("name"))
             .transition()
+              .delay(5000)
               .duration(3000)
               .attr("fill-opacity", 0.0)
 
