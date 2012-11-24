@@ -29,7 +29,7 @@ module Disco
           visited_instances << instance
           trigger(:instance_visited, instance: instance, connections: connections)
           exploration_queue.uniq!
-        rescue SocketError => e
+        rescue Errno::ECONNREFUSED, SocketError => e
           trigger(:connection_error, error: e, instance: instance)
         end
       end

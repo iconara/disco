@@ -46,6 +46,11 @@ module Disco
         expect { explorer.discover_topology(%w[host1]) }.to_not raise_error
       end
 
+      it 'ignores nodes that refuse connections' do
+        connection_explorer.stub(:discover_connections).with(instance2).and_raise(Errno::ECONNREFUSED)
+        expect { explorer.discover_topology(%w[host1]) }.to_not raise_error
+      end
+
       context 'events' do
         it 'triggers an event when it starts' do
           triggered = false
