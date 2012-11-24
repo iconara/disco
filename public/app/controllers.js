@@ -31,11 +31,7 @@ var AppController = function ($scope, $rootScope, $http, hostsManager, discovery
     $scope.apps = hostsManager.apps()
     var randomNode = hostsManager.randomHost()
     var startRequest = $http.post("/disco/start", {seed: randomNode.public_dns_name})
-    startRequest.success(function () {
-      console.log("started")
-    }).error(function () {
-      console.log("already running")
-    })
+    startRequest.then(discoveryEvents.start, discoveryEvents.start)
   }
 
   discoveryEvents.addEventListener("visit", function (e) {
@@ -55,6 +51,5 @@ var AppController = function ($scope, $rootScope, $http, hostsManager, discovery
   })
 
   hostsManager.load()
-    .then(discoveryEvents.start)
     .then(start)
 }
