@@ -34,6 +34,7 @@ class EventsHandler
     @broadcasts = []
     @topology_explorer = topology_explorer
     @topology_explorer.on(:start_exploration, &method(:start_exploration))
+    @topology_explorer.on(:exploration_complete, &method(:exploration_complete))
     @topology_explorer.on(:visit_instance, &method(:visit_instance))
     @topology_explorer.on(:instance_visited, &method(:instance_visited))
   end
@@ -69,6 +70,11 @@ class EventsHandler
   def start_exploration(event)
     $stderr.puts('Resetting broadcasts')
     @broadcasts = []
+  end
+
+  def exploration_complete(event)
+    $stderr.puts('Done!')
+    broadcast('done', '')
   end
 
   def visit_instance(event)

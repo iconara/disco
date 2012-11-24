@@ -2,11 +2,20 @@
   var discoModule = angular.module("disco")
 
   discoModule.directive("topology", function (d3, $window) {
+    var COLORS = ["#ff8964", "#6f2b15", "#bc5837", "#0a6f58", "#37bc9e", "#6e431a", "#bb6d23", "#09596e", "#49d8ff", "#bb7123", "#6e451a", "#7b2ebb", "#cb8cff"]
+
+    var colors = function (i) {
+      return COLORS[i % COLORS.length]
+    }
+
     return {
       restrict: "E",
       template: '<div></div>',
       replace: true,
       link: function(scope, element, attrs) {
+        var currentNode = null
+        var apps = []
+
         scope.$watch(attrs.nodes, function (newNodes) {
           forceLayout.nodes(newNodes)
           update()
@@ -16,6 +25,16 @@
           forceLayout.links(newLinks)
           update()
         }, true)
+
+        scope.$watch(attrs.current, function (newCurrentNode) {
+          currentNode = newCurrentNode
+          update()
+        }, true)
+
+        scope.$watch(attrs.apps, function (newApps) {
+          apps = newApps
+          update()
+        })
 
         var svg = null
         var linksGroup = null
@@ -112,6 +131,8 @@
           nodesGroup.selectAll(".node")
             .attr("cx", pluck("x"))
             .attr("cy", pluck("y"))
+            .attr("fill", function (d) { return colors(apps.indexOf(d.app)) })
+            .classed("current", function (d) { return currentNode && currentNode.id == d.id })
 
           labelsGroup.selectAll(".label")
             .attr("x", pluck("x"))
@@ -124,9 +145,8 @@
 
         var areConnected = function(n1, n2) {
           return forceLayout.links().some(function (link) {
-            var soughtNodes = [n1.index, n2.index].sort()
-            var linkNodes = [link.source, link.target].sort()
-            return soughtNodes[0] == linkNodes[0] && soughtNodes[1] == linkNodes[1]
+            return (link.source.id == n1.id && link.target.id == n2.id) ||
+                   (link.source.id == n2.id && link.target.id == n1.id)
           })
         }
 
@@ -163,7 +183,6 @@
             .insert("svg:circle")
               .attr("class", "node")
               .attr("r", 10)
-              .attr("fill", "red") //function (d) { return colors(topologyManager.apps().indexOf(d.app)) })
               .on("mouseover", nodeMouseOver)
               .on("mouseout", nodeMouseOut)
               .call(forceLayout.drag)

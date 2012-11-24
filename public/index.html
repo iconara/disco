@@ -10,15 +10,12 @@
     <script src="app/services.js"></script>
     <script src="app/directives/topology.js"></script>
     <script src="app/controllers.js"></script>
-    <!-- 
-    <script src="app/utils.js"></script>
-    <script src="app/topologyManager.js"></script>
-    <script src="app/topologyBuilder.js"></script>
-    <script src="app/visualizationController.js"></script>
-    <script src="app/main.js"></script>
-    -->
   </head>
   <body ng-controller="AppController">
-    <topology nodes="topology.nodes" links="topology.links"></topology>
+    <topology current="topology.current"
+                nodes="topology.nodes"
+                links="topology.links"
+                apps="apps">
+    </topology>
   </body>
 </html>

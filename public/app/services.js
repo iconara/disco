@@ -1,4 +1,13 @@
 (function () {
+  var parseApp = function (hostName) {
+    var matchData = hostName.match(/^(?:prod|staging)(.+?)\d+\.byburt\.com$/)
+    if (matchData) {
+      return matchData[1]
+    } else {
+      return null
+    }
+  }
+
   var discoModule = angular.module("disco")
 
   discoModule.factory("discoveryEvents", function ($window) {
@@ -16,7 +25,7 @@
 
     self.start = function () {
       events = new $window.EventSource("/events")
-      ;["visit", "visited"].forEach(function (eventName) {
+      ;["visit", "visited", "done"].forEach(function (eventName) {
         events.addEventListener(eventName, function (e) {
           dispatchEvent(eventName, JSON.parse(e.data))
         })
@@ -52,6 +61,10 @@
       return hosts[Math.floor(Math.random() * hosts.length)]
     }
 
+    self.apps = function () {
+      return hosts.map(function (host) { return parseApp(host.tags.Name) })
+    }
+
     return self
   })
 
@@ -75,12 +88,19 @@
     }
 
     var addNodeFromHost = function (host) {
-      var node = {id: host.instance_id, name: host.tags.Name, index: nodes.length}
+      var node = {
+        id: host.instance_id,
+        name: host.tags.Name,
+        app: parseApp(host.tags.Name),
+        index: nodes.length
+      }
 
       nodes.push(node)
       nodesById[node.id] = node
 
       addLinksFromNode(node)
+
+      return node
     }
 
     var addLinksFromNode = function (node) {
@@ -102,7 +122,8 @@
 
     var linkExists = function (sourceNode, targetNode) {
       return links.some(function (link) {
-        return (link.source == sourceNode.index && link.target == targetNode.index) || (link.source == targetNode.index && link.target == sourceNode.index)
+        return (link.source == sourceNode.index && link.target == targetNode.index) ||
+              (link.source == targetNode.index && link.target == sourceNode.index)
       })
     }
 
@@ -127,8 +148,9 @@
       if (!(host.instance_id in hostsById)) {
         hosts.push(host)
         hostsById[host.instance_id] = host
-        addNodeFromHost(host)
+        return addNodeFromHost(host)
       }
+      return nodesById[host.instance_id]
     }
 
     self.addConnections = function (conns) {

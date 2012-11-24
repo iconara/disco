@@ -13,6 +13,12 @@ body {
 .node {
 }
 
+.node.current {
+  stroke: #dddddd;
+  stroke-width: 5px;
+  r: 20px;
+}
+
 .link {
   stroke: #444444;
   stroke-width: 3px;
