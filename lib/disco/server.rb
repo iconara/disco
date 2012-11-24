@@ -27,4 +27,10 @@ module Disco
       end
     end
   end
+
+  class Disco
+    def server(port=3000)
+      Server.start(instance_registry, topology_explorer, port)
+    end
+  end
 end

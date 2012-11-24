@@ -9,12 +9,6 @@ require 'disco'
 require 'disco/server'
 
 
-ec2 = Disco::Ec2.new(AWS, ec2_endpoint: 'ec2.eu-west-1.amazonaws.com')
-instances = Disco::InstanceCache.new('.instances.json', ec2).instances
-services = Disco::ServicePortMapper.new(custom: {'apani1' => 9160})
-discovery_commands = [Disco::SsCommand.new(services)]
-connection_explorer = Disco::ConnectionExplorer.new(discovery_commands, instances, username: 'burt', sampling_duration: 10.0)
-topology_explorer = Disco::TopologyExplorer.new(connection_explorer, instances)
-server = Disco::Server.start(instances, topology_explorer)
+server = Disco.create(username: 'burt').server
 
 $stderr.puts("Server running on #{server.uri}")
