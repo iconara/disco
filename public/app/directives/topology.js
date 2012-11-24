@@ -115,7 +115,6 @@
         }
 
         var resizeUpdate = function () {
-          console.log("resizeUpdate")
           svg.attr("width", width()).attr("height", height())
           forceLayout.size([width(), height()])
           update()

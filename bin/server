@@ -97,11 +97,7 @@ class EventsHandler
       :connections => connections
     }
     broadcast('visited', plain_event.to_json)
-
-
-    instance_name = event[:instance].name
-    all_connections = event[:connections].flat_map { |c| [c.upstream_instance.name, c.downstream_instance.name] }.uniq - [instance_name]
-    $stderr.puts("visited #{instance_name}, connections: #{all_connections.join(', ')}")
+    $stderr.puts("visited #{event[:instance].name}")
   end
 end
 
