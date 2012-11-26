@@ -71,7 +71,7 @@
 
           addBlurFilter(svg.append("svg:defs"))
 
-          $window.addEventListener("resize", resizeUpdate)
+          d3.select($window).on("resize", resizeUpdate)
 
           update()
         }
@@ -251,8 +251,9 @@
               .attr("dy", 4)
               .text(pluck("name"))
 
-          forceLayout.size([width(), height()])
-          forceLayout.start()
+          forceLayout
+            .size([width(), height()])
+            .start()
         }
 
         start()
